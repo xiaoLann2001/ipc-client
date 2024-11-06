@@ -2,10 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
-
-namespace Ui {
-class Widget;
-}
+#include <QVBoxLayout>
 
 class Widget : public QWidget
 {
@@ -16,7 +13,7 @@ public:
     ~Widget();
 
 private:
-    Ui::Widget *ui;
+    
 };
 
 #endif // WIDGET_H

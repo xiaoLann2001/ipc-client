@@ -1,0 +1,72 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "create-build-directory",
+            "command": "mkdir",
+            "args": [
+                "-p",
+                "${workspaceFolder}/build-ipc-client-Desktop-Debug"
+            ],
+            "type": "shell",
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "detail": "Ensuring build directory exists"
+        },
+        {
+            "label": "qmake",
+            "command": "/opt/Qt5.12.8/5.12.8/gcc_64/bin/qmake",
+            "args": [
+                "${workspaceFolder}/ipc-client/ipc-client.pro",
+                "-spec", "linux-g++",
+                "CONFIG+=debug",
+                "CONFIG+=qml_debug"
+            ],
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "options": {
+                "cwd": "${workspaceFolder}/build-ipc-client-Desktop-Debug"  // 设置工作目录为构建目录
+            },
+            "dependsOn": "create-build-directory",
+            "detail": "Running qmake in build directory to generate Makefile"
+        },
+        {
+            "label": "make",
+            "command": "make",
+            "args": [
+                "-j4",
+                "-C", "${workspaceFolder}/build-ipc-client-Desktop-Debug"
+            ],
+            "type": "shell",
+            "dependsOn": "qmake",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Running make to compile the project"
+        },
+        {
+            "label": "clean",
+            "command": "make",
+            "args": [
+                "clean",
+                "-j4",
+                "-C", "${workspaceFolder}/build-ipc-client-Desktop-Debug"
+            ],
+            "type": "shell",
+            "group": {
+                "kind": "clean",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Cleaning build files"
+        }
+    ]
+}

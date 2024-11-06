@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug ipc-client",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-ipc-client-Desktop-Debug/ipc-client",  // 请根据你的实际可执行文件路径修改
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",  // 请确保 gdb 的路径是正确的
+            "preLaunchTask": "make",  // 依赖于你定义的 make 任务，确保它在调试前执行
+            // "postDebugTask": "clean",  // 如果需要，可以在调试结束后清理构建文件
+            "logging": {
+                "moduleLoad": false
+            },
+            "sourceFileMap": {
+                "/build/ipc-client": "${workspaceFolder}/build-ipc-client-Desktop-Debug/ipc-client"
+            },
+        }
+    ]
+}
