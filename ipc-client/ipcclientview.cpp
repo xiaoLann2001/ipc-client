@@ -1,4 +1,4 @@
-#include "widget.h"
+#include "ipcclientview.h"
 
 #include "videoviewwidget.h"
 #include "videoreplywidget.h"
@@ -14,17 +14,20 @@
 #include <QPushButton>
 #include <QLabel>
 
-Widget::Widget(QWidget *parent) :
+IPCClientView::IPCClientView(QWidget *parent) :
     QWidget(parent)
 {
+    // 创建页面布局，分为从上至下分别为顶部布局、页面切换控件、其他信息布局
     QVBoxLayout *layout = new QVBoxLayout();
 
-    // Top
+    // 创建顶部布局
     QHBoxLayout *layout_top = new QHBoxLayout;
 
+    // 应用 LOGO 和名称
     QLabel *label_applogo = new QLabel("LOGO");
     QLabel *label_appname = new QLabel("IPC-CLIENT");
 
+    // 创建菜单按钮
     QHBoxLayout *layout_menu = new QHBoxLayout;
     QPushButton *pushButton_page_videoview = new QPushButton("view");
     QPushButton *pushButton_page_videoreply = new QPushButton("reply");
@@ -35,6 +38,7 @@ Widget::Widget(QWidget *parent) :
     layout_menu->addWidget(pushButton_page_videoevent);
     layout_menu->addWidget(pushButton_page_videosetting);
 
+    // 创建其他信息布局
     QVBoxLayout *layout_otherinfo = new QVBoxLayout();
     QHBoxLayout *layout_windowcontrol = new QHBoxLayout();
     QPushButton *pushButton_minimize = new QPushButton("-");
@@ -53,6 +57,7 @@ Widget::Widget(QWidget *parent) :
     layout_top->addLayout(layout_menu);
     layout_top->addLayout(layout_otherinfo);
 
+    // 创建页面切换控件，显示主要内容
     QStackedWidget *stackedwidget = new QStackedWidget();
     VideoViewWidget *widget_videoview = new VideoViewWidget();
     VideoReplyWidget *widget_videoreply = new VideoReplyWidget();
@@ -63,21 +68,26 @@ Widget::Widget(QWidget *parent) :
     stackedwidget->addWidget(widget_event);
     stackedwidget->addWidget(widget_setting);
     stackedwidget->setCurrentIndex(0);
-    stackedwidget->setMinimumSize(1024, 480);
+    stackedwidget->setMinimumSize(1024, 520);
 
+    // 为菜单按钮添加点击事件
     connect(pushButton_page_videoview, &QPushButton::clicked, [stackedwidget]() { stackedwidget->setCurrentIndex(0); });
     connect(pushButton_page_videoreply, &QPushButton::clicked, [stackedwidget]() { stackedwidget->setCurrentIndex(1); });
     connect(pushButton_page_videoevent, &QPushButton::clicked, [stackedwidget]() { stackedwidget->setCurrentIndex(2); });
     connect(pushButton_page_videosetting, &QPushButton::clicked, [stackedwidget]() { stackedwidget->setCurrentIndex(3); });
 
+    // 添加顶部布局和页面切换控件到主布局
     layout->addLayout(layout_top);
     layout->addWidget(stackedwidget);
 
+    // 设置布局
     setLayout(layout);
+
+    // 设置窗口大小
     resize(1024, 600);
 }
 
-Widget::~Widget()
+IPCClientView::~IPCClientView()
 {
 
 }

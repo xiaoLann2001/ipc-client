@@ -26,18 +26,28 @@ CONFIG += c++11 debug
 
 SOURCES += \
         main.cpp \
-        widget.cpp \
-    videoviewwidget.cpp \
-    videoreplywidget.cpp \
-    eventwidget.cpp \
-    settingwidget.cpp
+        ipcclientmodel.cpp \
+        ipcclientview.cpp \
+        ipcclientcontroller.cpp \
+        videoviewwidget.cpp \
+        videoreplywidget.cpp \
+        eventwidget.cpp \
+        settingwidget.cpp \
+    videogridview.cpp \
+    videodisplayunit.cpp \
+    videodisplayviewpool.cpp
 
 HEADERS += \
-        widget.h \
-    videoviewwidget.h \
-    videoreplywidget.h \
-    eventwidget.h \
-    settingwidget.h
+        ipcclientmodel.h \
+        ipcclientview.h \
+        ipcclientcontroller.h \
+        videoviewwidget.h \
+        videoreplywidget.h \
+        eventwidget.h \
+        settingwidget.h \
+    videogridview.h \
+    videodisplayunit.h \
+    videodisplayviewpool.h
 
 FORMS +=
 
