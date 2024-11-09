@@ -103,6 +103,7 @@
 #define __FLT64X_MIN_10_EXP__ (-4931)
 #define __LDBL_HAS_QUIET_NAN__ 1
 #define __FLT64_MANT_DIG__ 53
+#define _REENTRANT 1
 #define __GNUC__ 7
 #define __GXX_RTTI 1
 #define __pie__ 2

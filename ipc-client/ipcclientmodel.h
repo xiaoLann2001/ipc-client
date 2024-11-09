@@ -6,6 +6,8 @@ class IPCClientModel
 {
 public:
     IPCClientModel();
+
+private:
 };
 
 #endif // IPCCLIENTMODEL_H

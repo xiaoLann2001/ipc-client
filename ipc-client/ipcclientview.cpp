@@ -59,16 +59,16 @@ IPCClientView::IPCClientView(QWidget *parent) :
 
     // 创建页面切换控件，显示主要内容
     QStackedWidget *stackedwidget = new QStackedWidget();
-    VideoViewWidget *widget_videoview = new VideoViewWidget();
-    VideoReplyWidget *widget_videoreply = new VideoReplyWidget();
-    EventWidget *widget_event = new EventWidget();
-    SettingWidget *widget_setting = new SettingWidget();
+    VideoViewWidget *widget_videoview = new VideoViewWidget();      // 视频监控视图
+    VideoReplyWidget *widget_videoreply = new VideoReplyWidget();   // 视频回放视图
+    EventWidget *widget_event = new EventWidget();                  // 事件视图
+    SettingWidget *widget_setting = new SettingWidget();            // 设置视图
     stackedwidget->addWidget(widget_videoview);
     stackedwidget->addWidget(widget_videoreply);
     stackedwidget->addWidget(widget_event);
     stackedwidget->addWidget(widget_setting);
     stackedwidget->setCurrentIndex(0);
-    stackedwidget->setMinimumSize(1024, 520);
+    stackedwidget->setMinimumSize(1024, 540);
 
     // 为菜单按钮添加点击事件
     connect(pushButton_page_videoview, &QPushButton::clicked, [stackedwidget]() { stackedwidget->setCurrentIndex(0); });

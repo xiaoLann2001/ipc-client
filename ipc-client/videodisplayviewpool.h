@@ -12,6 +12,7 @@ public:
     ~VideoDisplayViewPool();
 
     VideoDisplayUnit* acquire();
+    VideoDisplayUnit* acquire(QWidget* parent);
     void release(VideoDisplayUnit* widget);
 
 private:

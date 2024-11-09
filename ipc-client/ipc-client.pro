@@ -22,32 +22,40 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11 debug
+CONFIG += c++11 thread debug
 
 SOURCES += \
         main.cpp \
         ipcclientmodel.cpp \
         ipcclientview.cpp \
         ipcclientcontroller.cpp \
-        videoviewwidget.cpp \
-        videoreplywidget.cpp \
-        eventwidget.cpp \
-        settingwidget.cpp \
+    videoviewwidget.cpp \
+    videoreplywidget.cpp \
+    eventwidget.cpp \
+    settingwidget.cpp \
     videogridview.cpp \
     videodisplayunit.cpp \
-    videodisplayviewpool.cpp
+    videodisplayviewpool.cpp \
+    videostreammanager.cpp \
+    videostream.cpp
 
 HEADERS += \
         ipcclientmodel.h \
         ipcclientview.h \
         ipcclientcontroller.h \
-        videoviewwidget.h \
-        videoreplywidget.h \
-        eventwidget.h \
-        settingwidget.h \
+    videoviewwidget.h \
+    videoreplywidget.h \
+    eventwidget.h \
+    settingwidget.h \
     videogridview.h \
     videodisplayunit.h \
-    videodisplayviewpool.h
+    videodisplayviewpool.h \
+    videostreammanager.h \
+    videostream.h
+
+INCLUDEPATH += /usr/include/x86_64-linux-gnu
+LIBS += -L/usr/lib/x86_64-linux-gnu -lavcodec -lavformat -lswscale
+
 
 FORMS +=
 

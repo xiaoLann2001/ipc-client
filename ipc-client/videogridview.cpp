@@ -1,107 +1,203 @@
 #include "videogridview.h"
 
 #include <QPainter>
+#include <QDebug>
+
+// view层只关注本页面的显示，不关注翻页，翻页由controller层和model层协同完成
+// view提供翻页的信号，controller层接收信号，调用model层的翻页函数，将视频数据传递给view层
+// 指定的控件显示
 
 VideoGridView::VideoGridView(QWidget *parent) : QWidget(parent)
 {
-    m_pool = new VideoDisplayViewPool(16);  // 创建控件池
+    m_video_grid_ = 0;
+    m_selected_index_ = -1;
+    m_maximized_index_ = -1;
+
+    m_pool_ = new VideoDisplayViewPool(16); // 创建控件池
 }
 
 void VideoGridView::setGrid(VideoGrid grid)
 {
-    // 首先将当前显示控件释放回控件池
-    for (auto display : m_displayViews) {
-        display->hide();  // 隐藏控件，以免影响布局
-        m_pool->release(display);  // 将控件释放回控件池
+    // 如果有控件最大化，先还原
+    if (m_maximized_index_ != -1)
+    {
+        std::lock_guard<std::mutex> lock(mtx_maximized_index_);
+        m_maximized_index_ = -1; // 重置最大化索引
     }
-    m_displayViews.clear();  // 清空当前显示控件的指针列表
 
-    // 更新网格布局
-    m_video_grid_ = grid;
+    // 计算需要释放的控件数量，采取增量更新方式
+    int numDisplays = 0;
+    {
+        std::lock_guard<std::mutex> lock(mtx_grid_);
+        numDisplays = m_video_grid_ - grid;
+    }
 
-    // 根据新的网格大小，从控件池获取所需数量的 VideoDisplayView 控件
-    int numDisplays = static_cast<int>(grid);
-    for (int i = 0; i < numDisplays; ++i) {
-        VideoDisplayUnit* display = m_pool->acquire();
-        if (display) {
-            display->setParent(this);  // 设置父控件
-            connect(display, &VideoDisplayUnit::clicked, this, &VideoGridView::onVideoDisplayUnitClicked);  // 连接点击信号
-            display->show();  // 显示控件
-            m_displayViews.push_back(display);  // 存储控件
+    if (numDisplays == 0) // 不需要增加或释放控件
+    {
+        update(); // 触发重绘
+        return;
+    }
+    else if (numDisplays > 0)    // 需要释放控件
+    {
+        for (int i = 0; i < numDisplays; ++i)
+        {
+            VideoDisplayUnit *display = m_displayviews_.back();
+            m_displayviews_.pop_back();
+            display->hide(); // 隐藏控件，以免影响布局
+            // 如果不断开点击信号连接，会导致点击信号触发时，槽函数被调用多次，可能会让有些控件连接不到槽函数
+            disconnect(display, &VideoDisplayUnit::clicked,
+                       this, &VideoGridView::onVideoDisplayUnitClicked); // 断开点击信号连接
+            disconnect(display, &VideoDisplayUnit::requestMaximizeOrRestore,
+                       this, &VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore); // 断开最大化信号连接
+            m_pool_->release(display);                                                    // 将控件释放回控件池
+        }
+    }
+    else if (numDisplays < 0)   // 需要增加控件
+    {
+        numDisplays = -numDisplays;
+        for (int i = 0; i < numDisplays; ++i)
+        {
+            VideoDisplayUnit *display = m_pool_->acquire(this); // 从控件池获取控件，设置父控件为当前控件
+            if (display)
+            {
+                connect(display, &VideoDisplayUnit::clicked,
+                        this, &VideoGridView::onVideoDisplayUnitClicked); // 连接点击信号
+                connect(display, &VideoDisplayUnit::requestMaximizeOrRestore,
+                        this, &VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore); // 连接最大化信号
+                display->show();                                                           // 显示控件
+                m_displayviews_.push_back(display);                                        // 存储控件
+            }
         }
     }
 
-    update();  // 触发重绘
+    {
+        // 更新网格布局
+        std::lock_guard<std::mutex> lock(mtx_grid_);
+        m_video_grid_ = grid;
+    }
+
+    update(); // 触发重绘
 }
 
 void VideoGridView::setVideo(int index, const QImage &image)
 {
-    if (index >= 0 && static_cast<size_t>(index) < m_displayViews.size()) {
-        m_displayViews[index]->setImage(image);
+    if (index >= 0 && static_cast<size_t>(index) < m_displayviews_.size())
+    {
+        m_displayviews_[index]->setImage(image);
     }
 }
 
 void VideoGridView::onVideoDisplayUnitClicked(int id_videodisplayunit)
 {
-    // 查找点击的控件索引
-    for (size_t i = 0; i < m_displayViews.size(); ++i) {
-        if (m_displayViews[i]->getId() == id_videodisplayunit) {
-            selected_index_ = i;
-            update();   // 触发重绘
-            break;
+    // qDebug() << "VideoGridView::onVideoDisplayUnitClicked: " << id_videodisplayunit;
+    // 检查当前选中项是否已经是点击的控件
+    if (m_selected_index_ != -1 && m_displayviews_[m_selected_index_]->getId() == id_videodisplayunit)
+    {
+        std::lock_guard<std::mutex> lock(mtx_selected_index_);
+        m_selected_index_ = -1; // 取消选中
+    }
+    else
+    {
+        // 查找点击的控件索引
+        for (size_t i = 0; i < m_displayviews_.size(); ++i)
+        {
+            if (m_displayviews_[i]->getId() == id_videodisplayunit)
+            {
+                std::lock_guard<std::mutex> lock(mtx_selected_index_);
+                m_selected_index_ = i;
+                break;
+            }
         }
     }
+    update(); // 触发重绘
+}
+
+void VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore(int id_videodisplayunit)
+{
+    // 如果有控件最大化，先还原
+    if (m_maximized_index_ != -1)
+    {
+        std::lock_guard<std::mutex> lock(mtx_maximized_index_);
+        m_maximized_index_ = -1; // 重置最大化索引
+    }
+    else
+    {
+        // 查找点击的控件索引
+        for (size_t i = 0; i < m_displayviews_.size(); ++i)
+        {
+            if (m_displayviews_[i]->getId() == id_videodisplayunit)
+            {
+                std::lock_guard<std::mutex> lock(mtx_maximized_index_);
+                m_maximized_index_ = i;
+                break;
+            }
+        }
+    }
+
+    update(); // 触发重绘
 }
 
 void VideoGridView::paintEvent(QPaintEvent *event)
 {
+    // static int count = 0;
+    // qDebug() << "VideoGridView::paintEvent: " << count++;
+
     QWidget::paintEvent(event);
 
     QPainter painter(this);
-    painter.fillRect(this->rect(), QColor("darkgray"));
-    // painter.setPen(QColor("lightgray"));
+    painter.fillRect(rect(), QColor("darkgray"));
 
+    // 获取数据所需的锁
+    std::lock_guard<std::mutex> lock_grid(mtx_grid_);
+    std::lock_guard<std::mutex> lock_selected_index(mtx_selected_index_);
+    std::lock_guard<std::mutex> lock_maximized_index(mtx_maximized_index_);
+
+
+    if (m_maximized_index_ >= 0 && m_maximized_index_ < m_video_grid_)
+    {
+        // 显示最大化的控件
+        m_displayviews_[m_maximized_index_]->setGeometry(0, 0, width(), height());
+        m_displayviews_[m_maximized_index_]->show();
+    }
+    else
+    {
+        displayVideoGrid(painter);
+    }
+}
+
+void VideoGridView::displayVideoGrid(QPainter& painter)
+{
     int rows = 0, cols = 0;
-    switch (m_video_grid_) {
-        case VideoGridOne:
-            rows = 1;
-            cols = 1;
-            break;
-        case VideoGridFour:
-            rows = 2;
-            cols = 2;
-            break;
-        case VideoGridNine:
-            rows = 3;
-            cols = 3;
-            break;
-        case VideoGridSixteen:
-            rows = 4;
-            cols = 4;
-            break;
+    switch (m_video_grid_)
+    {
+    case VideoGridOne:
+        rows = 1;
+        cols = 1;
+        break;
+    case VideoGridFour:
+        rows = 2;
+        cols = 2;
+        break;
+    case VideoGridNine:
+        rows = 3;
+        cols = 3;
+        break;
+    case VideoGridSixteen:
+        rows = 4;
+        cols = 4;
+        break;
     }
 
-    int spacing = 2;  // 设置控件间隔为1像素
-
-    // // 绘制网格线
-    // for (int i = 1; i < cols; ++i) {
-    //     painter.drawLine(i * width() / cols, 0, i * width() / cols, height());
-    // }
-    // for (int i = 1; i < rows; ++i) {
-    //     painter.drawLine(0, i * height() / rows, width(), i * height() / rows);
-    // }
-
-    // 计算每个视频显示控件的大小，包含间隔
+    int spacing = 2; // 设置控件间隔为2像素
     int displayWidth = (width() - (cols + 1) * spacing) / cols;
     int displayHeight = (height() - (rows + 1) * spacing) / rows;
 
-    // 设置每个视频显示控件的位置和大小
-    for (int i = 0; static_cast<size_t>(i) < m_displayViews.size(); ++i) {
+    for (int i = 0; i < m_video_grid_; ++i)
+    {
         int row = i / cols;
         int col = i % cols;
-        VideoDisplayUnit* display = m_displayViews[i];
+        VideoDisplayUnit* display = m_displayviews_[i];
 
-        // 根据行列设置控件的位置，间隔增加
         int x = col * (displayWidth + spacing) + spacing;
         int y = row * (displayHeight + spacing) + spacing;
 
@@ -109,10 +205,11 @@ void VideoGridView::paintEvent(QPaintEvent *event)
         display->show();
     }
 
-    // 绘制选框
-    if (selected_index_ >= 0 && static_cast<size_t>(selected_index_) < m_displayViews.size()) {
-        int row = selected_index_ / cols;
-        int col = selected_index_ % cols;
+    if (m_selected_index_ >= 0 && static_cast<size_t>(m_selected_index_) < m_displayviews_.size())
+    {
+        int index = m_selected_index_;
+        int row = index / cols;
+        int col = index % cols;
         int x = col * (displayWidth + spacing);
         int y = row * (displayHeight + spacing);
         int borderWidth = 3;
@@ -120,3 +217,4 @@ void VideoGridView::paintEvent(QPaintEvent *event)
         painter.drawRect(x, y, displayWidth + spacing, displayHeight + spacing);
     }
 }
+
