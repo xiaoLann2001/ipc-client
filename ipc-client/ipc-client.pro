@@ -25,31 +25,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11 thread debug
 
 SOURCES += \
-    src/application/ipcclientapplication.cpp \
-    src/application/ipcclientcontroller.cpp \
-    src/application/ipcclientview.cpp \
+    src/application/IPCClientApplication.cpp \
+    src/application/IPCClientController.cpp \
+    src/application/IPCClientView.cpp \
     src/event/eventview/eventwidget.cpp \
     src/setting/settingview/settingwidget.cpp \
-    src/video/video/videostream.cpp \
-    src/video/videomanager/videostreammanager.cpp \
-    src/video/videoview/videodisplayunit.cpp \
-    src/video/videoview/videodisplayviewpool.cpp \
-    src/video/videoview/videogridview.cpp \
-    src/video/videoview/videoviewwidget.cpp \
+    src/video/VideoStream/VideoStreamDecoder.cpp \
+    src/video/VideoStreamController/VideoStreamController.cpp \
+    src/video/VideoStreamManager/VideoStreamManager.cpp \
+    src/video/VideoView/VideoDisplayUnit.cpp \
+    src/video/VideoView/VideoDisplayUnitPool.cpp \
+    src/video/VideoView/VideoGridView.cpp \
+    src/video/VideoView/VideoViewWidget.cpp \
     src/main.cpp
+    
+    
+    
 
 HEADERS += \
-    src/application/ipcclientapplication.h \
-    src/application/ipcclientcontroller.h \
-    src/application/ipcclientview.h \
+    src/application/IPCClientApplication.h \
+    src/application/IPCClientController.h \
+    src/application/IPCClientView.h \
     src/event/eventview/eventwidget.h \
     src/setting/settingview/settingwidget.h \
-    src/video/video/videostream.h \
-    src/video/videomanager/videostreammanager.h \
-    src/video/videoview/videodisplayunit.h \
-    src/video/videoview/videodisplayviewpool.h \
-    src/video/videoview/videogridview.h \
-    src/video/videoview/videoviewwidget.h
+    src/video/VideoStream/VideoStreamDecoder.h \
+    src/video/VideoStreamController/VideoStreamController.h \
+    src/video/VideoStreamManager/VideoStreamManager.h \
+    src/video/VideoView/VideoDisplayUnit.h \
+    src/video/VideoView/VideoDisplayUnitPool.h \
+    src/video/VideoView/VideoGridView.h \
+    src/video/VideoView/VideoViewWidget.h
+    
+    
+    
 
 INCLUDEPATH += src \
     src/application \
@@ -61,9 +69,11 @@ INCLUDEPATH += src \
     src/video
 
 
-INCLUDEPATH += /usr/include/x86_64-linux-gnu
-LIBS += -L/usr/lib/x86_64-linux-gnu -lavcodec -lavformat -lswscale -lavutil
+INCLUDEPATH += 3rdparty/ffmpeg/include
+LIBS += -L 3rdparty/ffmpeg/lib -lavcodec -lavformat -lswscale -lavutil
 
+INCLUDEPATH += /usr/include/opencv2
+LIBS += -L/usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui
 
 FORMS +=
 

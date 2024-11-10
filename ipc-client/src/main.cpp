@@ -1,5 +1,5 @@
 
-#include <application/ipcclientapplication.h>
+#include <application/IPCClientApplication.h>
 
 #include <QFontDatabase>
 #include <QTranslator>

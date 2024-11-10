@@ -60,6 +60,8 @@
         "qgestureevent": "cpp",
         "cinttypes": "cpp",
         "qdebug": "cpp",
-        "qwidget": "cpp"
+        "qwidget": "cpp",
+        "qimage": "cpp",
+        "qstring": "cpp"
     }
 }
