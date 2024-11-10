@@ -25,36 +25,44 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11 thread debug
 
 SOURCES += \
-        main.cpp \
-        ipcclientmodel.cpp \
-        ipcclientview.cpp \
-        ipcclientcontroller.cpp \
-    videoviewwidget.cpp \
-    videoreplywidget.cpp \
-    eventwidget.cpp \
-    settingwidget.cpp \
-    videogridview.cpp \
-    videodisplayunit.cpp \
-    videodisplayviewpool.cpp \
-    videostreammanager.cpp \
-    videostream.cpp
+    src/application/ipcclientapplication.cpp \
+    src/application/ipcclientcontroller.cpp \
+    src/application/ipcclientview.cpp \
+    src/event/eventview/eventwidget.cpp \
+    src/setting/settingview/settingwidget.cpp \
+    src/video/video/videostream.cpp \
+    src/video/videomanager/videostreammanager.cpp \
+    src/video/videoview/videodisplayunit.cpp \
+    src/video/videoview/videodisplayviewpool.cpp \
+    src/video/videoview/videogridview.cpp \
+    src/video/videoview/videoviewwidget.cpp \
+    src/main.cpp
 
 HEADERS += \
-        ipcclientmodel.h \
-        ipcclientview.h \
-        ipcclientcontroller.h \
-    videoviewwidget.h \
-    videoreplywidget.h \
-    eventwidget.h \
-    settingwidget.h \
-    videogridview.h \
-    videodisplayunit.h \
-    videodisplayviewpool.h \
-    videostreammanager.h \
-    videostream.h
+    src/application/ipcclientapplication.h \
+    src/application/ipcclientcontroller.h \
+    src/application/ipcclientview.h \
+    src/event/eventview/eventwidget.h \
+    src/setting/settingview/settingwidget.h \
+    src/video/video/videostream.h \
+    src/video/videomanager/videostreammanager.h \
+    src/video/videoview/videodisplayunit.h \
+    src/video/videoview/videodisplayviewpool.h \
+    src/video/videoview/videogridview.h \
+    src/video/videoview/videoviewwidget.h
+
+INCLUDEPATH += src \
+    src/application \
+    src/core \
+    src/device \
+    src/event \
+    src/setting \
+    src/storage \
+    src/video
+
 
 INCLUDEPATH += /usr/include/x86_64-linux-gnu
-LIBS += -L/usr/lib/x86_64-linux-gnu -lavcodec -lavformat -lswscale
+LIBS += -L/usr/lib/x86_64-linux-gnu -lavcodec -lavformat -lswscale -lavutil
 
 
 FORMS +=
@@ -63,3 +71,10 @@ FORMS +=
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources/resources.qrc
+
+# run "lrelease ipc-client.pro" to generate .qm file
+TRANSLATIONS += resources/translations/lang_zh_CN.ts \
+                resources/translations/lang_en.ts

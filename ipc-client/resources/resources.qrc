@@ -1,0 +1,33 @@
+<RCC>
+    <qresource prefix="/">
+        <!-- Icons -->
+        <file>icons/applogo.svg</file>
+        
+        <!-- Fonts -->
+        <file>fonts/AndBasR.ttf</file>
+        <file>fonts/Bstgreek.ttf</file>
+        <file>fonts/ec_cour.ttf</file>
+        <file>fonts/ecl_cour.ttf</file>
+        <file>fonts/EcritureA-Italique-Ligne.otf</file>
+        <file>fonts/EcritureA-Italique-Orne-Ligne.otf</file>
+        <file>fonts/EcritureA-Italique-Orne.otf</file>
+        <file>fonts/EcritureA-Italique.otf</file>
+        <file>fonts/EcritureA-Romain-Ligne.otf</file>
+        <file>fonts/EcritureA-Romain-Orne-Ligne.otf</file>
+        <file>fonts/EcritureA-Romain-Orne.otf</file>
+        <file>fonts/EcritureA-Romain.otf</file>
+        <file>fonts/EcritureB-Italique-Ligne.otf</file>
+        <file>fonts/EcritureB-Italique-Orne-Ligne.otf</file>
+        <file>fonts/EcritureB-Italique-Orne.otf</file>
+        <file>fonts/EcritureB-Italique.otf</file>
+        <file>fonts/EcritureB-Romain-Ligne.otf</file>
+        <file>fonts/EcritureB-Romain-Orne-Ligne.otf</file>
+        <file>fonts/EcritureB-Romain-Orne.otf</file>
+        <file>fonts/EcritureB-Romain.otf</file>
+        <file>fonts/GETypoLibre.otf</file>
+        
+        <!-- Translations -->
+        <file>translations/lang_en.ts</file>
+        <file>translations/lang_zh_CN.ts</file>
+    </qresource>
+</RCC>
