@@ -15,7 +15,10 @@ public slots:
     void onAddVideoStream(int videoDisplayUnitId, const QString &url);  // 添加视频流到指定控件
     void onStopVideoDisplay(int videoDisplayUnitId);                    // 停止指定控件的视频显示
     void onOutOfGrid(int videoDisplayUnitId);                           // 视频控件超出网格
-    void onVideoGridPageChanged(int page);                              // 视频网格页码变化
+    void onVideoGridChanged(int page);                                  // 视频网格变化
+    void onVideoPageChanged(int page);                                  // 视频页码变化
+
+    void onAddIPCClicked();                                             // 添加 IPC 按钮点击
 
 
 

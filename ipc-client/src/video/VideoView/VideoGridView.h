@@ -47,6 +47,9 @@ private:
 
 signals:
 
+    void videoDisplayUnitRightClicked(int id_videodisplayunit, const QPoint &pos);  // 视频控件右击信号
+
+
 public slots:
     void onVideoDisplayUnitClicked(int id_videodisplayunit);  // 视频控件点击槽函数
 

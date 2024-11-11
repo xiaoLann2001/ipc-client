@@ -3355,7 +3355,13 @@ VideoStreamController.o: ../ipc-client/src/video/VideoStreamController/VideoStre
 		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtCore/qdatetime.h \
 		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets/QStackedWidget \
 		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets/qstackedwidget.h \
-		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtCore/QDebug
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets/QInputDialog \
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets/qinputdialog.h \
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets/qlineedit.h \
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtGui/qtextcursor.h \
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtGui/qtextformat.h \
+		/opt/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets/qdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VideoStreamController.o ../ipc-client/src/video/VideoStreamController/VideoStreamController.cpp
 
 VideoStreamManager.o: ../ipc-client/src/video/VideoStreamManager/VideoStreamManager.cpp ../ipc-client/src/video/VideoStreamManager/VideoStreamManager.h \

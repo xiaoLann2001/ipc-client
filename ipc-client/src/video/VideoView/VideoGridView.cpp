@@ -135,23 +135,25 @@ void VideoGridView::onVideoDisplayUnitClicked(int id_videodisplayunit)
 
 void VideoGridView::onVideoDisplayUnitRightClicked(int id_videodisplayunit, const QPoint &pos)
 {
-    // 在父窗口接收到右键点击的信号后弹出菜单
-    QMenu menu(this);
+    // // 在父窗口接收到右键点击的信号后弹出菜单
+    // QMenu menu(this);
 
-    // 根据 ID 创建菜单项
-    QAction *action1 = menu.addAction(QString("添加视频源"));
-    QAction *action2 = menu.addAction(QString("Action2"));
+    // // 根据 ID 创建菜单项
+    // QAction *action1 = menu.addAction(QString("添加视频源"));
+    // QAction *action2 = menu.addAction(QString("Action2"));
     
-    // 连接菜单项的动作
-    connect(action1, &QAction::triggered, [this, id_videodisplayunit]() {
-        qDebug() << "Action1 triggered: " << id_videodisplayunit;
-    });
-    connect(action2, &QAction::triggered, [this, id_videodisplayunit]() {
-        qDebug() << "Action2 triggered: " << id_videodisplayunit;
-    });
+    // // 连接菜单项的动作
+    // connect(action1, &QAction::triggered, [this, id_videodisplayunit]() {
+    //     qDebug() << "Action1 triggered: " << id_videodisplayunit;
+    // });
+    // connect(action2, &QAction::triggered, [this, id_videodisplayunit]() {
+    //     qDebug() << "Action2 triggered: " << id_videodisplayunit;
+    // });
 
-    // 在对应位置弹出菜单
-    menu.exec(pos);
+    // // 在对应位置弹出菜单
+    // menu.exec(pos);
+
+    emit videoDisplayUnitRightClicked(id_videodisplayunit, pos);
 }
 
 void VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore(int id_videodisplayunit)

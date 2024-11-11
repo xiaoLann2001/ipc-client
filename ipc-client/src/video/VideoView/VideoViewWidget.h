@@ -31,10 +31,32 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 signals:
-    
+    // 发送给控制器的信号
+    void addIPCClicked();
 
+    void pauseClicked();
+    void resolutionClicked();
+    void fullscreenClicked();
+    void snapshotClicked();
+    void recordClicked();
+    void albumClicked();
+    void osdClicked();
+    void alarmClicked();
+    void aiClicked();
+
+    void ptzPresetChanged(int preset);
+    void ptzUpClicked();
+    void ptzDownClicked();
+    void ptzLeftClicked();
+    void ptzRightClicked();
+    void ptzResetClicked();
+    void ptzStepChanged(int step);
+
+    void videoGridChanged(VideoGrid grid);
+    void videoPageChanged(int page);
 
 public slots:
+    // 从控制器接收信号的槽函数
     void onVideoPlay(int idx);
     void onVideoStop(int idx);
     void onNewFrame(int idx, QImage image);

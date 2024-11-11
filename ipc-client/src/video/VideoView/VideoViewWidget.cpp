@@ -10,6 +10,8 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     splitter = new QSplitter(Qt::Horizontal, this); // 创建水平分隔器
     splitter->setHandleWidth(8); // 设置分隔条的宽度
 
+    /*--------------------事件略缩图子窗口-------------------------------------*/
+
     // 创建事件略缩图子窗口
     int eventthumbnail_minwidth = 160;
     int eventthumbnail_maxwidth = 320;
@@ -28,6 +30,10 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     widget_eventthumbnail->setMinimumWidth(eventthumbnail_minwidth);
     widget_eventthumbnail->setMaximumWidth(eventthumbnail_maxwidth);
 
+    /*--------------------事件略缩图子窗口结束----------------------------------*/
+
+
+    /*--------------------视频监控子窗口---------------------------------------*/
 
     // 创建视频监控窗口
     int video_minwidth = 640;
@@ -55,15 +61,6 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     radiobutton_videogrid4->setMaximumHeight(status_maxheight);
     radiobutton_videogrid9->setMaximumHeight(status_maxheight);
     radiobutton_videogrid16->setMaximumHeight(status_maxheight);
-    // 默认网格数为4
-    radiobutton_videogrid4->setChecked(true);
-    // 连接视频监控网格切换按钮信号与槽
-    connect(radiobutton_videogrid1, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridOne);});
-    connect(radiobutton_videogrid4, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridFour);});
-    connect(radiobutton_videogrid9, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridNine);});
-    connect(radiobutton_videogrid16, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridSixteen);});
-    // 默认触发4网格显示
-    radiobutton_videogrid4->clicked();
     // 翻页按钮布局
     layout_videopage = new QHBoxLayout();
     pushbutton_prevpage = new QPushButton("上一页");
@@ -91,6 +88,10 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     // 将视频监控布局加入到视频监控窗口
     widget_video->setLayout(layout_video);
 
+    /*--------------------视频监控子窗口结束-----------------------------------*/
+
+
+    /*--------------------视频监控控制子窗口-----------------------------------*/
 
     // 创建视频监控控制子窗口
     int control_minwidth = 160;
@@ -230,6 +231,10 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     // 将子窗口布局加入到子窗口
     widget_control->setLayout(layout_control);
 
+    /*--------------------视频监控控制子窗口结束--------------------------------*/
+
+    /*--------------------设置总布局-------------------------------------------*/
+
     // 将子窗口加入到窗口布局
     splitter->addWidget(widget_eventthumbnail);
     splitter->addWidget(widget_video);
@@ -240,6 +245,62 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
 
     // 设置布局
     setLayout(layout);
+
+    /*--------------------设置总布局结束---------------------------------------*/
+
+    /*--------------------发送给子窗口的信号-----------------------------------*/
+
+    // 默认网格数为4
+    radiobutton_videogrid4->setChecked(true);
+    // 连接视频监控网格切换按钮信号与槽，到子窗口
+    connect(radiobutton_videogrid1, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridOne);});
+    connect(radiobutton_videogrid4, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridFour);});
+    connect(radiobutton_videogrid9, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridNine);});
+    connect(radiobutton_videogrid16, &QRadioButton::clicked, [this](){videogridview->setGrid(VideoGridSixteen);});
+
+    /*--------------------发送给控制器的信号------------------------------------*/
+
+    // 连接视频监控网格切换信号与槽，到控制器
+    connect(radiobutton_videogrid1, &QRadioButton::clicked, [this](){emit videoGridChanged(VideoGridOne);});
+    connect(radiobutton_videogrid4, &QRadioButton::clicked, [this](){emit videoGridChanged(VideoGridFour);});
+    connect(radiobutton_videogrid9, &QRadioButton::clicked, [this](){emit videoGridChanged(VideoGridNine);});
+    connect(radiobutton_videogrid16, &QRadioButton::clicked, [this](){emit videoGridChanged(VideoGridSixteen);});
+    // 默认触发4网格显示
+    radiobutton_videogrid4->clicked();
+
+
+    /*--------------------发送给控制器的信号-----------------------------------*/
+
+    // 添加视频源按钮信号连接
+    connect(pushbutton_addipc, &QPushButton::clicked, this, &VideoViewWidget::addIPCClicked);
+
+    // 视频控制按钮信号连接
+    connect(pushbutton_videocontrol_pause, &QPushButton::clicked, this, &VideoViewWidget::pauseClicked);
+    connect(pushbutton_videocontrol_resolution, &QPushButton::clicked, this, &VideoViewWidget::resolutionClicked);
+    connect(pushbutton_videocontrol_fullscreen, &QPushButton::clicked, this, &VideoViewWidget::fullscreenClicked);
+    connect(pushbutton_videocontrol_snapshot, &QPushButton::clicked, this, &VideoViewWidget::snapshotClicked);
+    connect(pushbutton_videocontrol_record, &QPushButton::clicked, this, &VideoViewWidget::recordClicked);
+    connect(pushbutton_videocontrol_album, &QPushButton::clicked, this, &VideoViewWidget::albumClicked);
+    connect(pushbutton_videocontrol_osd, &QPushButton::clicked, this, &VideoViewWidget::osdClicked);
+    connect(pushbutton_videocontrol_alarm, &QPushButton::clicked, this, &VideoViewWidget::alarmClicked);
+    connect(pushbutton_videocontrol_ai, &QPushButton::clicked, this, &VideoViewWidget::aiClicked);
+
+    // 云台控制按钮信号连接
+    connect(pushbutton_ptz_up, &QPushButton::clicked, this, &VideoViewWidget::ptzUpClicked);
+    connect(pushbutton_ptz_down, &QPushButton::clicked, this, &VideoViewWidget::ptzDownClicked);
+    connect(pushbutton_ptz_left, &QPushButton::clicked, this, &VideoViewWidget::ptzLeftClicked);
+    connect(pushbutton_ptz_right, &QPushButton::clicked, this, &VideoViewWidget::ptzRightClicked);
+    connect(pushbutton_ptz_reset, &QPushButton::clicked, this, &VideoViewWidget::ptzResetClicked);
+
+    // 云台预置点改变信号连接
+    connect(combobox_ptz_preset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &VideoViewWidget::ptzPresetChanged);
+
+    // 云台步长改变信号连接
+    connect(slider_ptz_step, &QSlider::valueChanged, this, &VideoViewWidget::ptzStepChanged);
+    connect(spinbox_ptz_step, QOverload<int>::of(&QSpinBox::valueChanged), this, &VideoViewWidget::ptzStepChanged);
+
+    /*------------------------------------------------------------------------*/
+
 }
 
 // 重载绘图事件处理函数
@@ -279,3 +340,6 @@ void VideoViewWidget::onNewFrame(int idx, QImage image)
     // 更新视频监控视图
     videogridview->onVideoSetImage(idx, image);
 }
+
+
+
