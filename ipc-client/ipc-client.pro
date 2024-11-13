@@ -25,48 +25,53 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11 thread debug
 
 SOURCES += \
-    src/application/IPCClientApplication.cpp \
-    src/application/IPCClientController.cpp \
-    src/application/IPCClientView.cpp \
-    src/event/eventview/eventwidget.cpp \
-    src/setting/settingview/settingwidget.cpp \
-    src/video/VideoStream/VideoStreamDecoder.cpp \
-    src/video/VideoStreamController/VideoStreamController.cpp \
-    src/video/VideoStreamManager/VideoStreamManager.cpp \
-    src/video/VideoView/VideoDisplayUnit.cpp \
-    src/video/VideoView/VideoDisplayUnitPool.cpp \
-    src/video/VideoView/VideoGridView.cpp \
-    src/video/VideoView/VideoViewWidget.cpp \
-    src/main.cpp
+    src/Application/IPCClientApplication.cpp \
+    src/Application/IPCClientController.cpp \
+    src/Application/IPCClientView.cpp \
+    src/Setting/SettingView/SettingWidget.cpp \
+    src/Video/VideoStream/VideoStreamDecoder.cpp \
+    src/Video/VideoStreamController/VideoStreamController.cpp \
+    src/Video/VideoStreamManager/VideoStreamManager.cpp \
+    src/Video/VideoView/VideoDeviceListView.cpp \
+    src/Video/VideoView/VideoDisplayUnit.cpp \
+    src/Video/VideoView/VideoDisplayUnitPool.cpp \
+    src/Video/VideoView/VideoGridView.cpp \
+    src/Video/VideoView/VideoPtzView.cpp \
+    src/Video/VideoView/VideoViewWidget.cpp \
+    src/main.cpp \
+    src/Video/VideoView/VideoOperationView.cpp
+    
     
     
     
 
 HEADERS += \
-    src/application/IPCClientApplication.h \
-    src/application/IPCClientController.h \
-    src/application/IPCClientView.h \
-    src/event/eventview/eventwidget.h \
-    src/setting/settingview/settingwidget.h \
-    src/video/VideoStream/VideoStreamDecoder.h \
-    src/video/VideoStreamController/VideoStreamController.h \
-    src/video/VideoStreamManager/VideoStreamManager.h \
-    src/video/VideoView/VideoDisplayUnit.h \
-    src/video/VideoView/VideoDisplayUnitPool.h \
-    src/video/VideoView/VideoGridView.h \
-    src/video/VideoView/VideoViewWidget.h
+    src/Application/IPCClientApplication.h \
+    src/Application/IPCClientController.h \
+    src/Application/IPCClientView.h \
+    src/Setting/SettingView/SettingWidget.h \
+    src/Video/VideoStream/VideoStreamDecoder.h \
+    src/Video/VideoStreamController/VideoStreamController.h \
+    src/Video/VideoStreamManager/VideoStreamManager.h \
+    src/Video/VideoView/VideoDeviceListView.h \
+    src/Video/VideoView/VideoDisplayUnit.h \
+    src/Video/VideoView/VideoDisplayUnitPool.h \
+    src/Video/VideoView/VideoGridView.h \
+    src/Video/VideoView/VideoPtzView.h \
+    src/Video/VideoView/VideoViewWidget.h \
+    src/Video/VideoView/VideoOperationView.h
+    
     
     
     
 
 INCLUDEPATH += src \
-    src/application \
-    src/core \
-    src/device \
-    src/event \
-    src/setting \
-    src/storage \
-    src/video
+    src/Application \
+    src/Core \
+    src/Event \
+    src/Setting \
+    src/Storage \
+    src/Video
 
 
 INCLUDEPATH += 3rdparty/ffmpeg/include

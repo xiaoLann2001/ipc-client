@@ -22,7 +22,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_VideoGridView_t {
     QByteArrayData data[13];
-    char stringdata0[220];
+    char stringdata0[213];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,24 +32,23 @@ struct qt_meta_stringdata_VideoGridView_t {
 static const qt_meta_stringdata_VideoGridView_t qt_meta_stringdata_VideoGridView = {
     {
 QT_MOC_LITERAL(0, 0, 13), // "VideoGridView"
-QT_MOC_LITERAL(1, 14, 28), // "videoDisplayUnitRightClicked"
-QT_MOC_LITERAL(2, 43, 0), // ""
-QT_MOC_LITERAL(3, 44, 19), // "id_videodisplayunit"
-QT_MOC_LITERAL(4, 64, 3), // "pos"
-QT_MOC_LITERAL(5, 68, 25), // "onVideoDisplayUnitClicked"
-QT_MOC_LITERAL(6, 94, 30), // "onVideoDisplayUnitRightClicked"
-QT_MOC_LITERAL(7, 125, 42), // "onVideoDisplayUnitRequestMaxi..."
-QT_MOC_LITERAL(8, 168, 11), // "onVideoPlay"
-QT_MOC_LITERAL(9, 180, 5), // "index"
-QT_MOC_LITERAL(10, 186, 11), // "onVideoStop"
-QT_MOC_LITERAL(11, 198, 15), // "onVideoSetImage"
-QT_MOC_LITERAL(12, 214, 5) // "image"
+QT_MOC_LITERAL(1, 14, 23), // "videoDisplayUnitClicked"
+QT_MOC_LITERAL(2, 38, 0), // ""
+QT_MOC_LITERAL(3, 39, 19), // "id_videodisplayunit"
+QT_MOC_LITERAL(4, 59, 28), // "videoDisplayUnitRightClicked"
+QT_MOC_LITERAL(5, 88, 3), // "pos"
+QT_MOC_LITERAL(6, 92, 25), // "onVideoDisplayUnitClicked"
+QT_MOC_LITERAL(7, 118, 42), // "onVideoDisplayUnitRequestMaxi..."
+QT_MOC_LITERAL(8, 161, 11), // "onVideoPlay"
+QT_MOC_LITERAL(9, 173, 5), // "index"
+QT_MOC_LITERAL(10, 179, 11), // "onVideoStop"
+QT_MOC_LITERAL(11, 191, 15), // "onVideoSetImage"
+QT_MOC_LITERAL(12, 207, 5) // "image"
 
     },
-    "VideoGridView\0videoDisplayUnitRightClicked\0"
-    "\0id_videodisplayunit\0pos\0"
-    "onVideoDisplayUnitClicked\0"
-    "onVideoDisplayUnitRightClicked\0"
+    "VideoGridView\0videoDisplayUnitClicked\0"
+    "\0id_videodisplayunit\0videoDisplayUnitRightClicked\0"
+    "pos\0onVideoDisplayUnitClicked\0"
     "onVideoDisplayUnitRequestMaximizeOrRestore\0"
     "onVideoPlay\0index\0onVideoStop\0"
     "onVideoSetImage\0image"
@@ -67,25 +66,25 @@ static const uint qt_meta_data_VideoGridView[] = {
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
+       2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    2,   49,    2, 0x06 /* Public */,
+       1,    1,   49,    2, 0x06 /* Public */,
+       4,    2,   52,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       5,    1,   54,    2, 0x0a /* Public */,
-       6,    2,   57,    2, 0x0a /* Public */,
-       7,    1,   62,    2, 0x0a /* Public */,
-       8,    1,   65,    2, 0x0a /* Public */,
-      10,    1,   68,    2, 0x0a /* Public */,
-      11,    2,   71,    2, 0x0a /* Public */,
+       6,    1,   57,    2, 0x0a /* Public */,
+       7,    1,   60,    2, 0x0a /* Public */,
+       8,    1,   63,    2, 0x0a /* Public */,
+      10,    1,   66,    2, 0x0a /* Public */,
+      11,    2,   69,    2, 0x0a /* Public */,
 
  // signals: parameters
-    QMetaType::Void, QMetaType::Int, QMetaType::QPoint,    3,    4,
+    QMetaType::Void, QMetaType::Int,    3,
+    QMetaType::Void, QMetaType::Int, QMetaType::QPoint,    3,    5,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Int,    3,
-    QMetaType::Void, QMetaType::Int, QMetaType::QPoint,    3,    4,
     QMetaType::Void, QMetaType::Int,    3,
     QMetaType::Void, QMetaType::Int,    9,
     QMetaType::Void, QMetaType::Int,    9,
@@ -100,9 +99,9 @@ void VideoGridView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         auto *_t = static_cast<VideoGridView *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->videoDisplayUnitRightClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const QPoint(*)>(_a[2]))); break;
-        case 1: _t->onVideoDisplayUnitClicked((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 2: _t->onVideoDisplayUnitRightClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const QPoint(*)>(_a[2]))); break;
+        case 0: _t->videoDisplayUnitClicked((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: _t->videoDisplayUnitRightClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< const QPoint(*)>(_a[2]))); break;
+        case 2: _t->onVideoDisplayUnitClicked((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 3: _t->onVideoDisplayUnitRequestMaximizeOrRestore((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 4: _t->onVideoPlay((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 5: _t->onVideoStop((*reinterpret_cast< int(*)>(_a[1]))); break;
@@ -112,9 +111,16 @@ void VideoGridView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
+            using _t = void (VideoGridView::*)(int );
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&VideoGridView::videoDisplayUnitClicked)) {
+                *result = 0;
+                return;
+            }
+        }
+        {
             using _t = void (VideoGridView::*)(int , const QPoint & );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&VideoGridView::videoDisplayUnitRightClicked)) {
-                *result = 0;
+                *result = 1;
                 return;
             }
         }
@@ -162,10 +168,17 @@ int VideoGridView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
+void VideoGridView::videoDisplayUnitClicked(int _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 0, _a);
+}
+
+// SIGNAL 1
 void VideoGridView::videoDisplayUnitRightClicked(int _t1, const QPoint & _t2)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
-    QMetaObject::activate(this, &staticMetaObject, 0, _a);
+    QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE
