@@ -5,13 +5,26 @@
 
 VideoStreamController::VideoStreamController(VideoStreamManager *manager, VideoViewWidget *view, QObject *parent)
     : QObject(parent), m_manager(manager), m_view(view) {
+
+    // 初始化对话框
+    m_inputDialog = new QInputDialog();
+    m_inputDialog->setWindowTitle(tr("添加IPC"));
+    m_inputDialog->setLabelText(tr("请输入IPC地址:"));
+    m_inputDialog->setTextValue("rtsp://");
+    m_inputDialog->resize(400, 100);
+
+    // 初始化右键菜单
+    m_menu = new QMenu();
+    m_addIPCAction = m_menu->addAction(tr("添加IPC"));
+    m_removeIPCAction = m_menu->addAction(tr("移除IPC"));
     
+    // 连接模型层的信号到槽函数
     connect(m_manager, &VideoStreamManager::newFrameAvailable, this, &VideoStreamController::onNewFrameAvailable);
 
+    // 连接视图层的信号到槽函数
     connect(m_view, &VideoViewWidget::addIPCClicked, this, &VideoStreamController::onAddIPCClicked);
 
     connect(m_view, &VideoViewWidget::videoGridChanged, this, &VideoStreamController::onVideoGridChanged);
-    
     
     connect(m_view, &VideoViewWidget::videoGridViewClicked, this, &VideoStreamController::onVideoViewClicked);
     connect(m_view, &VideoViewWidget::videoGridViewRightClicked, this, &VideoStreamController::onVideoViewRightClicked);
@@ -22,6 +35,12 @@ VideoStreamController::~VideoStreamController() {
     for (auto it = m_displayUnitToHandle.begin(); it != m_displayUnitToHandle.end(); ++it) {
         m_manager->deleteVideoStream(it.value());
     }
+
+    // 未设置父类，需要手动释放
+    delete m_inputDialog;
+    delete m_menu;
+    delete m_addIPCAction;
+    delete m_removeIPCAction;
 }
 
 // 将视频流绑定到指定控件
@@ -57,44 +76,28 @@ void VideoStreamController::deleteVideoStreamfromViewId(int videoDisplayUnitId) 
 /*--------------------对话框和右键菜单获取用户输入------------------------------*/
 
 QString VideoStreamController::getUserInputFromDialog() {
-    // 创建一个 QInputDialog 实例
-    QInputDialog dialog;
-    dialog.setWindowTitle(tr("添加IPC"));
-    dialog.setLabelText(tr("请输入IPC地址:"));
-    dialog.setTextValue("rtsp://");
-
-    // 调整对话框大小
-    dialog.resize(400, 100);
-
     // 设置对话框显示在主窗口中心
     if (m_view != nullptr) {
-        // 获取主窗口的中心点位置
         QRect mainWindowRect = m_view->geometry();
-        int centerX = mainWindowRect.center().x() - dialog.width() / 2;
-        int centerY = mainWindowRect.center().y() - dialog.height() / 2;
-
-        // 将对话框移动到主窗口中心
-        dialog.move(m_view->mapToGlobal(QPoint(centerX, centerY)));
+        int centerX = mainWindowRect.center().x() - m_inputDialog->width() / 2;
+        int centerY = mainWindowRect.center().y() - m_inputDialog->height() / 2;
+        m_inputDialog->move(m_view->mapToGlobal(QPoint(centerX, centerY)));
     }
 
     // 显示对话框并获取用户输入
-    if (dialog.exec() == QDialog::Accepted) {
-        return dialog.textValue();
+    if (m_inputDialog->exec() == QDialog::Accepted) {
+        return m_inputDialog->textValue();
     } else {
         return QString();
     }
 }
 
 QString VideoStreamController::getUserOptionFromMenu(const QPoint &pos) {
-    QMenu menu;
-    QAction *addIPCAction = menu.addAction(tr("添加IPC"));
-    QAction *removeIPCAction = menu.addAction(tr("移除IPC"));
-
-    // 显示菜单
-    QAction *selectedAction = menu.exec(pos);
-    if (selectedAction == addIPCAction) {
+    // 显示右键菜单
+    QAction *selectedAction = m_menu->exec(pos);
+    if (selectedAction == m_addIPCAction) {
         return "addIPC";
-    } else if (selectedAction == removeIPCAction) {
+    } else if (selectedAction == m_addIPCAction) {
         return "removeIPC";
     } else {
         return QString();

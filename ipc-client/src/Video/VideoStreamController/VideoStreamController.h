@@ -1,5 +1,7 @@
 #include <QObject>
 #include <QMap>
+#include <QInputDialog>
+#include <QMenu>
 #include "VideoStreamManager/VideoStreamManager.h"
 #include "VideoView/VideoViewWidget.h"
 
@@ -47,4 +49,9 @@ private:
 
     VideoStreamManager *m_manager;
     VideoViewWidget *m_view;
+
+    QInputDialog *m_inputDialog;                                        // IPC 地址输入对话框
+    QMenu *m_menu;                                                      // 右键菜单
+    QAction *m_addIPCAction;                                            // 添加 IPC 动作
+    QAction *m_removeIPCAction;                                         // 移除 IPC 动作
 };

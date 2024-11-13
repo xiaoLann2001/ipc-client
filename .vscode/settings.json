@@ -62,6 +62,10 @@
         "qdebug": "cpp",
         "qwidget": "cpp",
         "qimage": "cpp",
-        "qstring": "cpp"
+        "qstring": "cpp",
+        "qmenu": "cpp",
+        "qfont": "cpp",
+        "qfontdatabase": "cpp",
+        "qscrollarea": "cpp"
     }
 }

@@ -24,6 +24,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     int m_video_grid_ = 0;          // 视频网格布局
@@ -32,11 +33,14 @@ private:
 
     VideoDisplayUnitPool *m_pool_;  // 控件池
     std::vector<VideoDisplayUnit*> m_displayviews_;  // 存储视频显示控件指针
+    std::vector<QRect> m_display_geometries_;  // 存储视频显示控件的几何信息
 
     std::mutex mtx_grid_;  // 网格互斥锁, 保护网格变量
     std::mutex mtx_selected_index_;  // 选中索引互斥锁, 保护选中索引变量
     std::mutex mtx_maximized_index_;  // 最大化索引互斥锁, 保护最大化索引变量
 
+    void calculateGridLayout();  // 计算网格布局
+    void adjustDisplayUnits();  // 调整控件数量
     void displayVideoGrid(QPainter& painter);  // 显示视频网格
 
 signals:
