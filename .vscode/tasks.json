@@ -17,7 +17,7 @@
         },
         {
             "label": "qmake",
-            "command": "/opt/Qt5.12.8/5.12.8/gcc_64/bin/qmake",
+            "command": "/opt/Qt5.15.8/bin/qmake",
             "args": [
                 "${workspaceFolder}/ipc-client/ipc-client.pro",
                 "-spec", "linux-g++",

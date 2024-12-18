@@ -73,19 +73,9 @@ INCLUDEPATH += src \
     src/Storage \
     src/Video
 
-
-INCLUDEPATH += 3rdparty/ffmpeg/include
-LIBS += -L 3rdparty/ffmpeg/lib -lavcodec -lavformat -lswscale -lavutil
-
-INCLUDEPATH += /usr/include/opencv2
-LIBS += -L/usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui
+LIBS += -lavcodec -lavformat -lswscale -lavutil
 
 FORMS +=
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
     resources/resources.qrc
@@ -93,3 +83,8 @@ RESOURCES += \
 # run "lrelease ipc-client.pro" to generate .qm file
 TRANSLATIONS += resources/translations/lang_zh_CN.ts \
                 resources/translations/lang_en.ts
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /home/cat/Desktop/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
