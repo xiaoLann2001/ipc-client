@@ -13,17 +13,26 @@ VideoStreamManager::~VideoStreamManager() {
 }
 
 int VideoStreamManager::createVideoStream(const QString &url) {
-    int handle = generateHandle();
+    // 创建解码器
     VideoStreamDecoder *decoder = new VideoStreamDecoder(url, this);
 
+    // 生成句柄
+    int handle = generateHandle();
+    
     // 将解码器存储到映射中
     m_streams[handle] = decoder;
+
+    // 连接解码器的 finished 信号到 清理操作
+    connect(decoder, &QThread::finished, [handle, this]() {
+        qDebug() << "Decoder finished: " << handle;
+        this->deleteVideoStream(handle);
+    });
 
     // 连接解码器的新帧信号到槽函数
     connect(decoder, &VideoStreamDecoder::newFrameAvailable, [this, handle]() {
         emit newFrameAvailable(handle);
     });
-    
+
     // 启动解码器
     decoder->start();
 
@@ -35,7 +44,7 @@ void VideoStreamManager::deleteVideoStream(int handle) {
     if (m_streams.contains(handle)) {       // 如果句柄对应的解码器存在
         VideoStreamDecoder *decoder = m_streams[handle];    // 获取解码器
         decoder->stop();                    // 停止解码器
-        delete decoder;                     // 删除解码器
+        decoder->deleteLater();             // 安全删除解码器
         m_streams.remove(handle);           // 从映射中移除
         recycleHandle(handle);              // 回收句柄
     }

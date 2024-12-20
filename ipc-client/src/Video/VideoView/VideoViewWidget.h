@@ -27,6 +27,9 @@ class VideoViewWidget : public QWidget
 public:
     explicit VideoViewWidget(QWidget *parent = nullptr);
 
+    // 网格信息
+    int getGrid();
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 

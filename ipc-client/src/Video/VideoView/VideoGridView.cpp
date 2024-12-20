@@ -17,6 +17,11 @@ VideoGridView::VideoGridView(QWidget *parent) : QWidget(parent)
     m_pool_ = new VideoDisplayUnitPool(16); // 创建控件池
 }
 
+int VideoGridView::getGrid()
+{
+    return m_video_grid_;
+}
+
 void VideoGridView::setGrid(VideoGrid grid)
 {
     // 如果有控件最大化，先还原

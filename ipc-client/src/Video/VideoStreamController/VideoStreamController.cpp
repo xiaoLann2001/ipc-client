@@ -10,7 +10,7 @@ VideoStreamController::VideoStreamController(VideoStreamManager *manager, VideoV
     m_inputDialog = new QInputDialog();
     m_inputDialog->setWindowTitle(tr("添加IPC"));
     m_inputDialog->setLabelText(tr("请输入IPC地址:"));
-    m_inputDialog->setTextValue("rtsp://");
+    m_inputDialog->setTextValue("rtsp://192.168.5.185/live/1");
     m_inputDialog->resize(400, 100);
 
     // 初始化右键菜单
@@ -97,7 +97,7 @@ QString VideoStreamController::getUserOptionFromMenu(const QPoint &pos) {
     QAction *selectedAction = m_menu->exec(pos);
     if (selectedAction == m_addIPCAction) {
         return "addIPC";
-    } else if (selectedAction == m_addIPCAction) {
+    } else if (selectedAction == m_removeIPCAction) {
         return "removeIPC";
     } else {
         return QString();
@@ -132,11 +132,27 @@ void VideoStreamController::onVideoPageChanged(int page) {
 
 
 void VideoStreamController::onAddIPCClicked() {
-    // QString url = getUserInputFromDialog();
-    // if (!url.isEmpty()) {
-    //     // 创建视频流
-    //     createVideoStreamfromViewId(m_currentVideoDisplayUnitId, url);
-    // }
+    // 若当前视频显示单元 ID 不为 -1，表示有被选中的窗口
+    if (m_currentVideoDisplayUnitId != -1) {
+        QString url = getUserInputFromDialog();
+        if (!url.isEmpty()) {
+            // 创建视频流
+            createVideoStreamfromViewId(m_currentVideoDisplayUnitId, url);
+        }
+        m_view->onVideoPlay(m_currentVideoDisplayUnitId);
+    } else {    // 否则选择未绑定视频的最小 ID 的窗口显示
+        for (int i = 0; i < m_view->getGrid(); ++i) {
+            if (!m_displayUnitToHandle.contains(i)) {
+                QString url = getUserInputFromDialog();
+                if (!url.isEmpty()) {
+                    // 创建视频流
+                    createVideoStreamfromViewId(i, url);
+                }
+                m_view->onVideoPlay(i);
+                break;
+            }
+        }
+    }
 }
 
 void VideoStreamController::onVideoViewClicked(int videoDisplayUnitId) {

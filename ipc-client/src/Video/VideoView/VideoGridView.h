@@ -20,6 +20,7 @@ class VideoGridView : public QWidget
     Q_OBJECT
 public:
     explicit VideoGridView(QWidget *parent = nullptr);
+    int getGrid();  // 获取网格数
     void setGrid(VideoGrid grid);   // 设置网格布局
 
 protected:

@@ -40,22 +40,23 @@ public:
     explicit VideoStreamDecoder(const QString &url, QObject *parent = nullptr);
     ~VideoStreamDecoder();
 
-    void stop();    // 停止解码线程
+    int initialize();                       // 初始化视频流
 
-    VideoStreamInfo* getVideoStreamInfo() { return m_info; }    // 获取视频流信息
+    void stop();                            // 停止解码线程
 
-    QImage getDecodedFrame();   // 获取解码后的帧
+    VideoStreamInfo* getVideoStreamInfo();  // 获取视频流信息
+
+    QImage getDecodedFrame();               // 获取解码后的帧
 
 protected:
-    void run() override;    // 线程运行函数
+    void run() override;                    // 线程运行函数
 
 signals:
-    void newFrameAvailable();  // 队列有新帧时发送信号
+    void newFrameAvailable();               // 队列有新帧时发送信号
 
 private:
-    bool initialize();  // 初始化视频流
     void decode(const AVPacket &packet);    // 解码视频帧
-    void cleanup(); // 清理资源
+    void cleanup();                         // 清理资源
 
     // 视频流信息
     QString m_url;                  // 视频流地址
@@ -65,7 +66,7 @@ private:
     AVFrame *m_pFrame;              // 视频帧
     AVFrame *m_pFrameRGB;           // RGB 格式视频帧
     SwsContext *m_pSwsCtx;          // 视频帧转换器
-    int m_videoStream;              // 视频流索引
+    int m_videoStreamIdx;           // 视频流索引
 
     // 视频流基本信息
     VideoStreamInfo *m_info;

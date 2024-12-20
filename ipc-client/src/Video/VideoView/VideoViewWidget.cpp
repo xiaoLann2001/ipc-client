@@ -309,6 +309,12 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
 
 }
 
+// 获取网格数
+int VideoViewWidget::getGrid()
+{
+    return videogridview->getGrid();
+}
+
 // 重载绘图事件处理函数
 void VideoViewWidget::paintEvent(QPaintEvent *event)
 {

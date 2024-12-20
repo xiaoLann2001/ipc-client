@@ -5,13 +5,14 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/ipc-client",
-                "/opt/Qt5.15.8/include",
-                "/opt/Qt5.15.8/include/QtWidgets",
-                "/opt/Qt5.15.8/include/QtCore",
-                "/opt/Qt5.15.8/include/QtGui",
+                "/home/xiaolan/Qt5.12.8/5.12.8/gcc_64/include",
+                "/home/xiaolan/Qt5.12.8/5.12.8/gcc_64/include/QtWidgets",
+                "/home/xiaolan/Qt5.12.8/5.12.8/gcc_64/include/QtCore",
+                "/home/xiaolan/Qt5.12.8/5.12.8/gcc_64/include/QtGui",
                 "/usr/include/c++/9",
                 "/usr/include/x86_64-linux-gnu/c++/9",
-                "/usr/include/x86_64-linux-gnu"
+                "/usr/include/x86_64-linux-gnu",
+                "/usr/local/ffmpeg/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",

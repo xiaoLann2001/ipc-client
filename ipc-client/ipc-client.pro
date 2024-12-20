@@ -73,7 +73,21 @@ INCLUDEPATH += src \
     src/Storage \
     src/Video
 
-LIBS += -lavcodec -lavformat -lswscale -lavutil
+QMAKE_CXXFLAGS += -v
+
+#LIBS += -lavcodec -lavformat -lswscale -lavutil -lswresample
+#message("QMAKE_CXX : $$QMAKE_CXX")
+
+contains(QMAKE_CXX, /usr/bin/aarch64-linux-gnu-g++) {
+    INCLUDEPATH += /opt/sysroot/usr/local/ffmpeg/include
+    LIBS += -L/opt/sysroot/usr/local/ffmpeg/lib -lavcodec -lavformat -lswscale -lavutil -lswresample
+    LIBS += -L/opt/sysroot/usr/local/x264/lib -lx264
+    LIBS += -L/opt/sysroot/usr/local/x265/lib -lx265
+    LIBS += -L/opt/sysroot/usr/local/lib -lrockchip_mpp
+} else {
+    INCLUDEPATH += /usr/local/ffmpeg/include
+    LIBS += -L/usr/local/ffmpeg/lib -lavcodec -lavformat -lswscale -lavutil -lswresample
+}
 
 FORMS +=
 
@@ -86,5 +100,5 @@ TRANSLATIONS += resources/translations/lang_zh_CN.ts \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /home/cat/Desktop/$${TARGET}/bin
+else: unix:!android: target.path = /root
 !isEmpty(target.path): INSTALLS += target

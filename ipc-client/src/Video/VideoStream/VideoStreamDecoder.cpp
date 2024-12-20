@@ -17,12 +17,15 @@ VideoStreamDecoder::VideoStreamDecoder(const QString &url, QObject *parent)
       m_pFrame(nullptr),
       m_pFrameRGB(nullptr),
       m_pSwsCtx(nullptr),
-      m_videoStream(-1) {}
+      m_videoStreamIdx(-1) {}
 
 VideoStreamDecoder::~VideoStreamDecoder() {
     stop();
-
     cleanup();
+}
+
+VideoStreamInfo* VideoStreamDecoder::getVideoStreamInfo() { 
+    return m_info; 
 }
 
 void VideoStreamDecoder::stop() {
@@ -40,7 +43,7 @@ void VideoStreamDecoder::stop() {
 
 void VideoStreamDecoder::run() {
     // 初始化视频流
-    if (!initialize()) {
+    if (-1 == initialize()) {
         cleanup();      // 初始化失败，清理资源
         return;
     }
@@ -54,9 +57,12 @@ void VideoStreamDecoder::run() {
         }
 
         // 读取数据包
-        if (av_read_frame(m_pFormatCtx, &packet) < 0) break;
+        if (av_read_frame(m_pFormatCtx, &packet) < 0) {
+            qWarning() << "Error reading frame, possibly due to stream disconnect or server crash";
+            break;
+        }
 
-        if (packet.stream_index == m_videoStream) { // 判断是否是视频流
+        if (packet.stream_index == m_videoStreamIdx) { // 判断是否是视频流
             // 解码视频帧
             decode(packet);
             // 释放数据包
@@ -68,67 +74,114 @@ void VideoStreamDecoder::run() {
     cleanup();
 }
 
-bool VideoStreamDecoder::initialize() {
+int VideoStreamDecoder::initialize() {
     // 初始化 FFmpeg 相关的库
-    av_register_all();          // 注册所有的编解码器
+    // av_register_all();          // 注册所有的编解码器
     avformat_network_init();    // 初始化网络流格式库
 
     // 打开视频流
     if (avformat_open_input(&m_pFormatCtx, m_url.toStdString().c_str(), nullptr, nullptr) != 0) {
         qWarning() << "Could not open video stream";
-        return false;
+        return -1;
     }
 
     // 获取流信息
     if (avformat_find_stream_info(m_pFormatCtx, nullptr) < 0) {
         qWarning() << "Could not find stream information";
-        return false;
+        cleanup();
+        return -1;
     }
 
     // 查找视频流，一般来说，RTSP 流中可能包含视频、音频等多个流，我们需要找到第一个视频流
     for (size_t i = 0; i < m_pFormatCtx->nb_streams; ++i) {  // 使用 size_t
         if (m_pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            m_videoStream = i;
+            m_videoStreamIdx = i;
             break;
         }
     }
-    if (m_videoStream == -1) {
+    if (m_videoStreamIdx == -1) {
         qWarning() << "Could not find video stream";
-        return false;
+        cleanup();
+        return -1;
     }
 
     // 获取解码器，并初始化解码上下文
-    m_pCodecCtx = avcodec_alloc_context3(nullptr);  // 分配解码上下文
-    avcodec_parameters_to_context(m_pCodecCtx, m_pFormatCtx->streams[m_videoStream]->codecpar); // 将流参数拷贝到解码上下文
-    // 查找解码器
-    m_pCodec = avcodec_find_decoder(m_pCodecCtx->codec_id);
+    // m_pCodecCtx = avcodec_alloc_context3(nullptr);  // 分配解码上下文
+    // avcodec_parameters_to_context(m_pCodecCtx, m_pFormatCtx->streams[m_videoStreamIdx]->codecpar); // 将流参数拷贝到解码上下文
+    // // 查找解码器
+    // m_pCodec = avcodec_find_decoder(m_pCodecCtx->codec_id);
+    // if (m_pCodec == nullptr) {
+    //     qWarning() << "Codec not found";
+    //     return false;
+    // }
+    
+    // 获取视频流的编码参数
+    AVCodecParameters *codecParams = m_pFormatCtx->streams[m_videoStreamIdx]->codecpar;
+    AVCodecID codecId = codecParams->codec_id;
+
+    // 根据编码类型选择解码器
+    switch (codecId) {
+        case AV_CODEC_ID_H264:
+            m_pCodec = avcodec_find_decoder_by_name("h264_rkmpp");  // 硬解码器
+            if (!m_pCodec) m_pCodec = avcodec_find_decoder(codecId); // 如果硬解码器不可用，使用软件解码器
+            break;
+        case AV_CODEC_ID_HEVC:
+            m_pCodec = avcodec_find_decoder_by_name("hevc_rkmpp");  // 硬解码器
+            if (!m_pCodec) m_pCodec = avcodec_find_decoder(codecId); // 如果硬解码器不可用，使用软件解码器
+            break;
+        default:
+            m_pCodec = avcodec_find_decoder(codecId);  // 使用软件解码器
+            break;
+    }
     if (m_pCodec == nullptr) {
         qWarning() << "Codec not found";
-        return false;
+        cleanup();
+        return -1;
+    }
+
+    // 打印解码器信息
+    qDebug() << "Codec: " << m_pCodec->long_name;
+
+    // 初始化解码器上下文
+    m_pCodecCtx = avcodec_alloc_context3(m_pCodec);
+    if (!m_pCodecCtx) {
+        qWarning() << "Could not allocate codec context";
+        cleanup();
+        return -1;
+    }
+
+    // 将流的编码参数复制到解码器上下文
+    if (avcodec_parameters_to_context(m_pCodecCtx, codecParams) < 0) {
+        qWarning() << "Failed to copy codec parameters to decoder context";
+        cleanup();
+        return -1;
     }
 
     // 打开解码器
     if (avcodec_open2(m_pCodecCtx, m_pCodec, nullptr) < 0) {
         qWarning() << "Could not open codec";
-        return false;
+        cleanup();
+        return -1;
     }
 
     // 获取视频的基本信息
     m_info = new VideoStreamInfo(m_url, m_pCodecCtx->width, m_pCodecCtx->height, 
-            av_q2d(m_pFormatCtx->streams[m_videoStream]->avg_frame_rate), 
+            av_q2d(m_pFormatCtx->streams[m_videoStreamIdx]->avg_frame_rate), 
             m_pCodec->long_name);
 
     // 初始化 RGB 帧
     m_pFrame = av_frame_alloc();
     if (!m_pFrame) {
         qWarning() << "Could not allocate frame";
-        return false;
+        cleanup();
+        return -1;
     }
 
     m_pFrameRGB = av_frame_alloc();
     if (!m_pFrameRGB) {
         qWarning() << "Could not allocate RGB frame";
-        return false;
+        cleanup();
+        return -1;
     }
 
     int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_pCodecCtx->width, m_pCodecCtx->height, 1);
@@ -140,7 +193,7 @@ bool VideoStreamDecoder::initialize() {
                                m_pCodecCtx->width, m_pCodecCtx->height, AV_PIX_FMT_RGB24, SWS_BILINEAR,
                                nullptr, nullptr, nullptr);
 
-    return true;
+    return 0;
 }
 
 void VideoStreamDecoder::decode(const AVPacket &packet) {
