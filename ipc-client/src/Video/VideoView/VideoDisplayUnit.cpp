@@ -4,9 +4,9 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-VideoDisplayUnit::VideoDisplayUnit(int id, QWidget *parent) : QWidget(parent)
+VideoDisplayUnit::VideoDisplayUnit(int id, QWidget *parent) 
+    : QWidget(parent), m_id_(id)
 {
-    m_id_ = id;
     m_ismaximized_ = false;
     m_isplaying_ = false;
 
@@ -84,26 +84,26 @@ void VideoDisplayUnit::paintEvent(QPaintEvent *event)
     }
 }
 
-void VideoDisplayUnit::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        // qDebug() << "VideoDisplayUnit::mousePressEvent: " << id_videodisplayunit_;
-        emit clicked(m_id_);     // 发送点击信号并传递 唯一ID
-    }
-    else if (event->button() == Qt::RightButton) {
-        // qDebug() << "VideoDisplayUnit::mousePressEvent: " << id_videodisplayunit_;
-        emit rightClicked(m_id_, event->globalPos());    // 发送右击信号并传递 唯一ID
-    }
-    QWidget::mousePressEvent(event);
-}
+// void VideoDisplayUnit::mousePressEvent(QMouseEvent *event)
+// {
+//     if (event->button() == Qt::LeftButton) {
+//         // qDebug() << "VideoDisplayUnit::mousePressEvent: " << id_videodisplayunit_;
+//         emit clicked(m_id_);     // 发送点击信号并传递 唯一ID
+//     }
+//     else if (event->button() == Qt::RightButton) {
+//         // qDebug() << "VideoDisplayUnit::mousePressEvent: " << id_videodisplayunit_;
+//         emit rightClicked(m_id_, event->globalPos());    // 发送右击信号并传递 唯一ID
+//     }
+//     QWidget::mousePressEvent(event);
+// }
 
-void VideoDisplayUnit::mouseDoubleClickEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        emit requestMaximizeOrRestore(m_id_);    // 发送请求最大化或还原信号并传递 唯一ID
-    }
-    QWidget::mouseDoubleClickEvent(event);
-}
+// void VideoDisplayUnit::mouseDoubleClickEvent(QMouseEvent *event)
+// {
+//     if (event->button() == Qt::LeftButton) {
+//         emit requestMaximizeOrRestore(m_id_);    // 发送请求最大化或还原信号并传递 唯一ID
+//     }
+//     QWidget::mouseDoubleClickEvent(event);
+// }
 
 void VideoDisplayUnit::enterEvent(QEvent *event)
 {

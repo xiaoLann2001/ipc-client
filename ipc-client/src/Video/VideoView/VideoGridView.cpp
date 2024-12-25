@@ -83,10 +83,13 @@ void VideoGridView::adjustDisplayUnits()
         {
             VideoDisplayUnit *display = m_displayviews_.back();
             m_displayviews_.pop_back();
-            disconnect(display, &VideoDisplayUnit::rightClicked, this, &VideoGridView::videoDisplayUnitRightClicked);
-            disconnect(display, &VideoDisplayUnit::clicked, this, &VideoGridView::onVideoDisplayUnitClicked);
-            disconnect(display, &VideoDisplayUnit::requestMaximizeOrRestore, this, &VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore);
             display->hide();
+            // 移除事件过滤器
+            display->removeEventFilter(this);
+            // 断开子窗口的信号连接
+            // disconnect(display, &VideoDisplayUnit::rightClicked, this, &VideoGridView::videoDisplayUnitRightClicked);
+            // disconnect(display, &VideoDisplayUnit::clicked, this, &VideoGridView::onVideoDisplayUnitClicked);
+            // disconnect(display, &VideoDisplayUnit::requestMaximizeOrRestore, this, &VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore);
             m_pool_->release(display);
         }
     }
@@ -98,9 +101,12 @@ void VideoGridView::adjustDisplayUnits()
             VideoDisplayUnit *display = m_pool_->acquire(this);
             if (display)
             {
-                connect(display, &VideoDisplayUnit::rightClicked, this, &VideoGridView::videoDisplayUnitRightClicked);
-                connect(display, &VideoDisplayUnit::clicked, this, &VideoGridView::onVideoDisplayUnitClicked);
-                connect(display, &VideoDisplayUnit::requestMaximizeOrRestore, this, &VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore);
+                // 连接子窗口的信号到上层
+                // connect(display, &VideoDisplayUnit::rightClicked, this, &VideoGridView::videoDisplayUnitRightClicked);
+                // connect(display, &VideoDisplayUnit::clicked, this, &VideoGridView::onVideoDisplayUnitClicked);
+                // connect(display, &VideoDisplayUnit::requestMaximizeOrRestore, this, &VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore);
+                // 为子窗口安装事件过滤器
+                display->installEventFilter(this);
                 display->show();
                 m_displayviews_.push_back(display);
             }
@@ -180,6 +186,45 @@ void VideoGridView::onVideoDisplayUnitRequestMaximizeOrRestore(int id_videodispl
     }
 
     update(); // 触发重绘
+}
+
+bool VideoGridView::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+
+        if (mouseEvent->button() == Qt::LeftButton) {
+            qDebug() << "子窗口被点击:" << watched;
+
+            onVideoDisplayUnitClicked(static_cast<VideoDisplayUnit*>(watched)->getId());
+
+            emit videoDisplayUnitClicked(static_cast<VideoDisplayUnit*>(watched)->getId());
+
+            return true; // 表示事件已被处理
+        }
+        else if (mouseEvent->button() == Qt::RightButton) {
+            qDebug() << "子窗口被右击:" << watched;
+
+            emit videoDisplayUnitRightClicked(static_cast<VideoDisplayUnit*>(watched)->getId(), mouseEvent->globalPos());
+
+            return true; // 表示事件已被处理
+        }
+    }
+    else if (event->type() == QEvent::MouseButtonDblClick)
+    {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+
+        if (mouseEvent->button() == Qt::LeftButton)
+        {
+            qDebug() << "子窗口被双击:" << watched;
+
+            onVideoDisplayUnitRequestMaximizeOrRestore(static_cast<VideoDisplayUnit*>(watched)->getId());
+
+            return true; // 表示事件已被处理
+        }
+    }
+
+    return QWidget::eventFilter(watched, event);
 }
 
 void VideoGridView::paintEvent(QPaintEvent *event)

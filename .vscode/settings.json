@@ -66,6 +66,10 @@
         "qmenu": "cpp",
         "qfont": "cpp",
         "qfontdatabase": "cpp",
-        "qscrollarea": "cpp"
+        "qscrollarea": "cpp",
+        "qthread": "cpp",
+        "qinputdialog": "cpp",
+        "qaudioformat": "cpp",
+        "qaudiooutput": "cpp"
     }
 }

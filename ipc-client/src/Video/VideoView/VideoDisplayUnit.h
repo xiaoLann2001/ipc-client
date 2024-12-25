@@ -19,9 +19,10 @@ public:
     void setTooltipLabel(const QString &text) { m_label_->setText(text); }
 
 protected:
+    // 绘图事件处理函数
     void paintEvent(QPaintEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    
+    // 与悬浮窗有关事件
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
@@ -38,15 +39,9 @@ private:
     QLabel *m_label_;       // 悬浮窗口标签
 
 signals:
-    void clicked(int m_id_);    // 点击信号, 传递唯一 ID
-
-    void rightClicked(int m_id_, const QPoint &pos);   // 右击信号, 传递唯一 ID 和鼠标位置
-
-    void requestMaximizeOrRestore(int m_id_);   // 请求最大化或还原信号, 传递唯一 ID
 
 public slots:
     void onPlay();      // 播放槽函数
-
     void onStop();      // 停止槽函数
 };
 

@@ -24,6 +24,7 @@ public:
     void setGrid(VideoGrid grid);   // 设置网格布局
 
 protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 

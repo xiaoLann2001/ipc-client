@@ -160,9 +160,7 @@ void VideoStreamController::onVideoViewClicked(int videoDisplayUnitId) {
     if (m_currentVideoDisplayUnitId == videoDisplayUnitId) {
         m_currentVideoDisplayUnitId = -1;
     } else {
-        if (m_displayUnitToHandle.contains(videoDisplayUnitId)) {
-            m_currentVideoDisplayUnitId = videoDisplayUnitId;
-        }
+        m_currentVideoDisplayUnitId = videoDisplayUnitId;
     }
 }
 
@@ -198,9 +196,8 @@ void VideoStreamController::onVideoViewRightClicked(int videoDisplayUnitId, cons
 
 void VideoStreamController::onNewFrameAvailable(int handle) {
     if (m_handleToDisplayUnit.contains(handle)) {
-        // qDebug() << "New frame available for handle: " << handle;
         int videoDisplayUnitId = m_handleToDisplayUnit[handle];
-        QImage img = m_manager->getDecodedFrame(handle);
+        QImage img = m_manager->getDecodedImage(handle);
         m_view->onNewFrame(videoDisplayUnitId, img);
     }
 }
