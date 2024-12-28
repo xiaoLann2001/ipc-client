@@ -7,51 +7,73 @@
 VideoDisplayUnit::VideoDisplayUnit(int id, QWidget *parent) 
     : QWidget(parent), m_id_(id)
 {
-    m_ismaximized_ = false;
     m_isplaying_ = false;
 
-    // 初始化悬浮窗，默认不可见
-    m_tooltip_ = new QWidget(this);
-    m_tooltip_->setStyleSheet("background-color: rgba(0, 0, 0, 200); color: white; font-size: 12px; border-radius: 5px;");
-    m_tooltip_->setFixedHeight(20);  // 悬浮窗高度固定为20
-    m_tooltip_->hide();  // 默认悬浮窗是隐藏的
-
-    // 添加标签显示信息
-    m_label_ = new QLabel("Video ID: " + QString::number(id), m_tooltip_);
-    m_label_->setStyleSheet("color: white; font-size: 12px;");
-    m_label_->move(5, 2);  // 设置文本的位置
+    tooltipInit();
 }
 
 void VideoDisplayUnit::setImage(const QImage &image)
 {
-    m_image_ = image;
+    {
+        QMutexLocker locker(&mtx_image_);
+        m_image_ = image;
+    }
     update();
     // repaint();
 }
 
-void VideoDisplayUnit::updateTooltip()
-{
-    // 显示悬浮窗
-    m_tooltip_->setFixedWidth(this->width());  // 设置悬浮窗宽度为当前控件宽度
-    m_tooltip_->move(0, 0);  // 将悬浮窗放置在控件顶部
-    m_tooltip_->show();  // 显示悬浮窗
-
-    // 将悬浮窗提升到最前面
-    m_tooltip_->raise();  
-}
-
 void VideoDisplayUnit::onPlay()
 {
-    std::lock_guard<std::mutex> lock(mtx_image_);
-    m_isplaying_ = true;
+    {
+        QMutexLocker locker(&mtx_playing_);
+        m_isplaying_ = true;
+    }
     update();
 }
 
-void VideoDisplayUnit::onStop()
+void VideoDisplayUnit::onPause()
 {
-    std::lock_guard<std::mutex> lock(mtx_image_);
-    m_isplaying_ = false;
+    {
+        QMutexLocker locker(&mtx_playing_);
+        m_isplaying_ = false;
+    }
     update();
+}
+
+void VideoDisplayUnit::onClose()
+{
+    {
+        QMutexLocker locker(&mtx_image_);
+        // 重置图像和播放状态，以及视频信息
+        m_image_ = QImage();
+    }
+    {
+        QMutexLocker locker(&mtx_playing_);
+        m_isplaying_ = false;
+    }
+    m_info_ = "";
+    update();
+}
+
+void VideoDisplayUnit::tooltipInit()
+{
+    // 创建悬浮窗
+    m_tooltip_ = new VideoDisplayTooltip(this);
+
+    // 设置悬浮窗的 ID
+    m_tooltip_->setId(m_id_);
+
+    // 设置悬浮窗的显示文本
+    m_tooltip_->setTooltipText("Video ID: " + QString::number(m_id_));
+
+    // 设置悬浮窗的显示模式
+    m_tooltip_->setTooltipMode(false);
+
+    // 隐藏悬浮窗
+    m_tooltip_->hide();
+
+    // 连接悬浮窗的信号与槽
+
 }
 
 void VideoDisplayUnit::paintEvent(QPaintEvent *event)
@@ -61,8 +83,9 @@ void VideoDisplayUnit::paintEvent(QPaintEvent *event)
 
     QWidget::paintEvent(event);
 
+    // 默认背景为加号
     QPainter painter(this);
-    painter.fillRect(rect(), QColor("#181818"));
+    painter.fillRect(this->rect(), QColor("#181818"));
 
     if (m_isplaying_ && !m_image_.isNull()) {
         QSize widgetSize = this->size();      // 获取显示区域的大小
@@ -107,7 +130,16 @@ void VideoDisplayUnit::paintEvent(QPaintEvent *event)
 
 void VideoDisplayUnit::enterEvent(QEvent *event)
 {
-    updateTooltip();  // 鼠标进入控件时，显示悬浮窗
+    // 当鼠标进入控件时，显示悬浮窗
+    if (!m_tooltip_->isVisible()) {
+        // 设置悬浮窗的位置为当前控件的顶部对齐
+        // QPoint tooltipPos = this->mapToGlobal(QPoint(0, 0)); // 映射到全局坐标
+        m_tooltip_->move(QPoint(0, 0));
+
+        // 置顶并显示悬浮窗
+        m_tooltip_->raise();
+        m_tooltip_->show();
+    }
 
     QWidget::enterEvent(event);
 }
@@ -115,7 +147,9 @@ void VideoDisplayUnit::enterEvent(QEvent *event)
 void VideoDisplayUnit::leaveEvent(QEvent *event)
 {
     // 当鼠标离开控件时，隐藏悬浮窗
-    m_tooltip_->hide();  // 隐藏悬浮窗
+    if (m_tooltip_->isVisible()) {
+        m_tooltip_->hide();
+    }
 
     QWidget::leaveEvent(event);
 }
@@ -124,6 +158,7 @@ void VideoDisplayUnit::resizeEvent(QResizeEvent *event)
 {
     // 当控件大小改变时，调整悬浮窗的宽度
     m_tooltip_->setFixedWidth(this->width());
+    // m_tooltip_->update();
 
     QWidget::resizeEvent(event);
 }

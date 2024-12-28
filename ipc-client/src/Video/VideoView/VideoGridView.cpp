@@ -1,4 +1,5 @@
 #include "VideoView/VideoGridView.h"
+#include "VideoDisplayTooltip.h"
 
 #include <QPainter>
 #include <QMenu>
@@ -54,7 +55,7 @@ void VideoGridView::calculateGridLayout()
     case VideoGridSixteen: rows = 4; cols = 4; break;
     }
 
-    int spacing = 2;
+    int spacing = 3;
     int displayWidth = (width() - (cols + 1) * spacing) / cols;
     int displayHeight = (height() - (rows + 1) * spacing) / rows;
 
@@ -122,11 +123,11 @@ void VideoGridView::onVideoPlay(int index)
     }
 }
 
-void VideoGridView::onVideoStop(int index)
+void VideoGridView::onVideoClose(int index)
 {
     if (index >= 0 && static_cast<size_t>(index) < m_displayviews_.size())
     {
-        m_displayviews_[index]->onStop();
+        m_displayviews_[index]->onClose();
     }
 }
 
@@ -277,8 +278,9 @@ void VideoGridView::displayVideoGrid(QPainter& painter)
     // 绘制选中框
     if (m_selected_index_ >= 0 && static_cast<size_t>(m_selected_index_) < m_display_geometries_.size())
     {
-        painter.setPen(QPen(QColor("red"), 3));
-        painter.drawRect(m_display_geometries_[m_selected_index_]);
+        painter.setPen(QPen(QColor("lightblue"), 3));
+        // painter.setBrush(Qt::NoBrush);  // 无填充
+        painter.drawRect(m_display_geometries_[m_selected_index_].adjusted(-2, -2, 1, 1));
     }
 }
 

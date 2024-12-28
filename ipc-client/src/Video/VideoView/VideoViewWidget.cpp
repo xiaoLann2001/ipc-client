@@ -3,17 +3,34 @@
 
 VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
 {
+    // 初始化界面
+    uiInit();
+
+    // 初始化控制
+    controlInit();
+}
+
+// 获取网格数
+int VideoViewWidget::getGrid()
+{
+    return videogridview->getGrid();
+}
+
+// 初始化界面
+void VideoViewWidget::uiInit()
+{
     // 创建页面布局，分为从左至右分别为事件略缩图、视频监控视图、控制区域
     layout = new QHBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 0); // 设置布局边距
 
     // 创建水平分隔器
     splitter = new QSplitter(Qt::Horizontal, this); // 创建水平分隔器
-    splitter->setHandleWidth(8); // 设置分隔条的宽度
+    splitter->setHandleWidth(0); // 设置分隔条的宽度
 
     /*--------------------事件略缩图子窗口-------------------------------------*/
 
     // 创建事件略缩图子窗口
-    int eventthumbnail_minwidth = 160;
+    int eventthumbnail_minwidth = 120;
     int eventthumbnail_maxwidth = 320;
     widget_eventthumbnail = new QWidget();
     // 创建左侧事件略缩图布局
@@ -66,9 +83,11 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     pushbutton_prevpage = new QPushButton("上一页");
     pushbutton_nextpage = new QPushButton("下一页");
     spinbox_page = new QSpinBox();
+    pushbutton_jumppage = new QPushButton("跳转");
     // 将翻页按钮加入到布局
     layout_videopage->addWidget(pushbutton_prevpage);
     layout_videopage->addWidget(spinbox_page);
+    layout_videopage->addWidget(pushbutton_jumppage);
     layout_videopage->addWidget(pushbutton_nextpage);
     // 设置视频状态信息
     label_videostatus = new QLabel("视频状态");
@@ -109,53 +128,55 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     pushbutton_addipc->setMaximumWidth(control_maxwidth);
     pushbutton_ipclist->setMinimumWidth(control_minwidth);
     pushbutton_ipclist->setMaximumWidth(control_maxwidth);
-    // 创建视频控制按钮3*3布局
-    gridlayout_videocontrol = new QGridLayout();
-    pushbutton_videocontrol_pause = new QPushButton("暂停");
-    pushbutton_videocontrol_resolution = new QPushButton("分辨率");
-    pushbutton_videocontrol_fullscreen = new QPushButton("全屏");
-    pushbutton_videocontrol_snapshot = new QPushButton("截图");
-    pushbutton_videocontrol_record = new QPushButton("录像");
-    pushbutton_videocontrol_album = new QPushButton("相册");
-    pushbutton_videocontrol_osd = new QPushButton("osd");
-    pushbutton_videocontrol_alarm = new QPushButton("报警");
-    pushbutton_videocontrol_ai = new QPushButton("AI");
-    // 设置视频控制按钮宽度
-    pushbutton_videocontrol_pause->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_pause->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_resolution->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_resolution->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_fullscreen->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_fullscreen->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_snapshot->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_snapshot->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_record->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_record->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_album->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_album->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_osd->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_osd->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_alarm->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_alarm->setMaximumWidth(control_maxwidth / 3);
-    pushbutton_videocontrol_ai->setMinimumWidth(control_minwidth / 3);
-    pushbutton_videocontrol_ai->setMaximumWidth(control_maxwidth / 3);
-    // 设置暂停键与播放键的切换
-    connect(pushbutton_videocontrol_pause, &QPushButton::clicked, [this](){
-        if (pushbutton_videocontrol_pause->text() == "暂停")
-            pushbutton_videocontrol_pause->setText("播放");
-        else
-            pushbutton_videocontrol_pause->setText("暂停");
-    });
-    // 加入到视频控制按钮布局
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_pause, 0, 0);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_resolution, 0, 1);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_fullscreen, 0, 2);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_snapshot, 1, 0);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_record, 1, 1);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_album, 1, 2);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_osd, 2, 0);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_alarm, 2, 1);
-    gridlayout_videocontrol->addWidget(pushbutton_videocontrol_ai, 2, 2);
+
+    // // 创建视频控制按钮3*3布局
+    // gridlayout_videocontrol = new QGridLayout();
+    // pushbutton_videocontrol_pause = new QPushButton("暂停");
+    // pushbutton_videocontrol_resolution = new QPushButton("分辨率");
+    // pushbutton_videocontrol_fullscreen = new QPushButton("全屏");
+    // pushbutton_videocontrol_snapshot = new QPushButton("截图");
+    // pushbutton_videocontrol_record = new QPushButton("录像");
+    // pushbutton_videocontrol_album = new QPushButton("相册");
+    // pushbutton_videocontrol_osd = new QPushButton("osd");
+    // pushbutton_videocontrol_alarm = new QPushButton("报警");
+    // pushbutton_videocontrol_ai = new QPushButton("AI");
+    // // 设置视频控制按钮宽度
+    // pushbutton_videocontrol_pause->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_pause->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_resolution->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_resolution->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_fullscreen->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_fullscreen->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_snapshot->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_snapshot->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_record->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_record->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_album->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_album->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_osd->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_osd->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_alarm->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_alarm->setMaximumWidth(control_maxwidth / 3);
+    // pushbutton_videocontrol_ai->setMinimumWidth(control_minwidth / 3);
+    // pushbutton_videocontrol_ai->setMaximumWidth(control_maxwidth / 3);
+    // // 设置暂停键与播放键的切换
+    // connect(pushbutton_videocontrol_pause, &QPushButton::clicked, [this](){
+    //     if (pushbutton_videocontrol_pause->text() == "暂停")
+    //         pushbutton_videocontrol_pause->setText("播放");
+    //     else
+    //         pushbutton_videocontrol_pause->setText("暂停");
+    // });
+    // // 加入到视频控制按钮布局
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_pause, 0, 0);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_resolution, 0, 1);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_fullscreen, 0, 2);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_snapshot, 1, 0);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_record, 1, 1);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_album, 1, 2);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_osd, 2, 0);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_alarm, 2, 1);
+    // gridlayout_videocontrol->addWidget(pushbutton_videocontrol_ai, 2, 2);
+
     // 创建云台预置点布局
     layout_ptz_preset = new QHBoxLayout();
     label_ptz_preset = new QLabel("云台预置点");
@@ -223,7 +244,7 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     layout_control->addWidget(pushbutton_addipc);
     layout_control->addWidget(pushbutton_ipclist);
     layout_control->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
-    layout_control->addLayout(gridlayout_videocontrol);
+    // layout_control->addLayout(gridlayout_videocontrol);
     layout_control->addWidget(label_ptz_angle);
     layout_control->addLayout(layout_ptz_preset);
     layout_control->addLayout(gridlayout_ptz);
@@ -247,7 +268,11 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     setLayout(layout);
 
     /*--------------------设置总布局结束---------------------------------------*/
+}
 
+// 初始化控制
+void VideoViewWidget::controlInit() 
+{
     /*--------------------发送给子窗口的信号-----------------------------------*/
 
     // 默认网格数为4
@@ -274,16 +299,16 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     // 添加视频源按钮信号连接
     connect(pushbutton_addipc, &QPushButton::clicked, this, &VideoViewWidget::addIPCClicked);
 
-    // 视频控制按钮信号连接
-    connect(pushbutton_videocontrol_pause, &QPushButton::clicked, this, &VideoViewWidget::pauseClicked);
-    connect(pushbutton_videocontrol_resolution, &QPushButton::clicked, this, &VideoViewWidget::resolutionClicked);
-    connect(pushbutton_videocontrol_fullscreen, &QPushButton::clicked, this, &VideoViewWidget::fullscreenClicked);
-    connect(pushbutton_videocontrol_snapshot, &QPushButton::clicked, this, &VideoViewWidget::snapshotClicked);
-    connect(pushbutton_videocontrol_record, &QPushButton::clicked, this, &VideoViewWidget::recordClicked);
-    connect(pushbutton_videocontrol_album, &QPushButton::clicked, this, &VideoViewWidget::albumClicked);
-    connect(pushbutton_videocontrol_osd, &QPushButton::clicked, this, &VideoViewWidget::osdClicked);
-    connect(pushbutton_videocontrol_alarm, &QPushButton::clicked, this, &VideoViewWidget::alarmClicked);
-    connect(pushbutton_videocontrol_ai, &QPushButton::clicked, this, &VideoViewWidget::aiClicked);
+    // // 视频控制按钮信号连接
+    // connect(pushbutton_videocontrol_pause, &QPushButton::clicked, this, &VideoViewWidget::pauseClicked);
+    // connect(pushbutton_videocontrol_resolution, &QPushButton::clicked, this, &VideoViewWidget::resolutionClicked);
+    // connect(pushbutton_videocontrol_fullscreen, &QPushButton::clicked, this, &VideoViewWidget::fullscreenClicked);
+    // connect(pushbutton_videocontrol_snapshot, &QPushButton::clicked, this, &VideoViewWidget::snapshotClicked);
+    // connect(pushbutton_videocontrol_record, &QPushButton::clicked, this, &VideoViewWidget::recordClicked);
+    // connect(pushbutton_videocontrol_album, &QPushButton::clicked, this, &VideoViewWidget::albumClicked);
+    // connect(pushbutton_videocontrol_osd, &QPushButton::clicked, this, &VideoViewWidget::osdClicked);
+    // connect(pushbutton_videocontrol_alarm, &QPushButton::clicked, this, &VideoViewWidget::alarmClicked);
+    // connect(pushbutton_videocontrol_ai, &QPushButton::clicked, this, &VideoViewWidget::aiClicked);
 
     // 云台控制按钮信号连接
     connect(pushbutton_ptz_up, &QPushButton::clicked, this, &VideoViewWidget::ptzUpClicked);
@@ -306,35 +331,9 @@ VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
     connect(videogridview, &VideoGridView::videoDisplayUnitRightClicked, this, &VideoViewWidget::videoGridViewRightClicked);
 
     /*------------------------------------------------------------------------*/
-
 }
 
-// 获取网格数
-int VideoViewWidget::getGrid()
-{
-    return videogridview->getGrid();
-}
 
-// 重载绘图事件处理函数
-void VideoViewWidget::paintEvent(QPaintEvent *event)
-{
-    // static int count = 0;
-    // qDebug() << "VideoViewWidget::paintEvent: " << count++;
-
-    // 调用基类的绘图事件
-    QWidget::paintEvent(event);
-
-    // 创建 QPainter 对象
-    QPainter painter(this);
-
-    // 设置背景填充颜色
-    painter.fillRect(this->rect(), QColor("lightgray"));
-
-    // // 其他绘制代码（如绘制形状或文本）可以在这里添加
-    // painter.setPen(Qt::black);
-    // painter.setBrush(Qt::yellow);
-    // painter.drawRect(50, 50, 200, 100); // 在窗口的特定位置绘制一个矩形
-}
 
 // 视频播放槽函数
 void VideoViewWidget::onVideoPlay(int idx)
@@ -345,7 +344,7 @@ void VideoViewWidget::onVideoPlay(int idx)
 // 视频停止槽函数
 void VideoViewWidget::onVideoStop(int idx)
 {
-    videogridview->onVideoStop(idx);
+    videogridview->onVideoClose(idx);
 }
 
 // 视频更新槽函数
@@ -354,6 +353,35 @@ void VideoViewWidget::onNewFrame(int idx, QImage image)
     // qDebug() << "VideoViewWidget::onNewFrame: " << idx;
     // 更新视频监控视图
     videogridview->onVideoSetImage(idx, image);
+}
+
+
+
+// 重载绘图事件处理函数
+void VideoViewWidget::paintEvent(QPaintEvent *event)
+{
+    // static int count = 0;
+    // qDebug() << "VideoViewWidget::paintEvent: " << count++;
+
+    // 创建 QPainter 对象
+    QPainter painter(this);
+
+    // 设置背景填充颜色
+    painter.fillRect(this->rect(), QColor("lightgray"));
+    // painter.fillRect(this->rect(), QColor("#181818"));
+    
+    // 绘制三个子窗口的底色
+    painter.fillRect(widget_eventthumbnail->geometry(), QColor("red"));
+    painter.fillRect(widget_video->geometry(), QColor("green"));
+    painter.fillRect(widget_control->geometry(), QColor("blue"));
+
+    // // 其他绘制代码（如绘制形状或文本）可以在这里添加
+    // painter.setPen(Qt::black);
+    // painter.setBrush(Qt::yellow);
+    // painter.drawRect(50, 50, 200, 100); // 在窗口的特定位置绘制一个矩形
+
+    // 调用基类的绘图事件
+    QWidget::paintEvent(event);
 }
 
 

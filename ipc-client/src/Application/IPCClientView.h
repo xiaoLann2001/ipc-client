@@ -10,10 +10,6 @@
 #include <QLabel>
 
 #include "VideoView/VideoViewWidget.h"
-// #include "deviceview/videosourcewidget.h"
-// #include "videoreply/videoreplywidget.h"
-// #include "event/eventwidget.h"
-// #include "setting/settingwidget.h"
 
 class IPCClientView : public QWidget
 {
@@ -26,10 +22,17 @@ public:
     VideoViewWidget *getVideoViewWidget() { return widget_videoview; }
 
 signals:
+    void pushButton_close_clicked();
 
 public slots:
 
+protected:
+    void paintEvent(QPaintEvent *event) override;
+
 private:
+    void uiInit();
+    void controlInit();
+
     // 创建页面布局，分为从上至下分别为顶部布局、页面切换控件、其他信息布局
     QVBoxLayout *layout;
 
@@ -51,19 +54,23 @@ private:
     // 创建其他信息布局
     QVBoxLayout *layout_otherinfo;
     QHBoxLayout *layout_windowcontrol;
+
+    // 创建窗口控制按钮
     QPushButton *pushButton_minimize;
     QPushButton *pushButton_maximize;
     QPushButton *pushButton_close;
+
+    // 创建当前时间标签
     QLabel *label_currenttime;
 
     // 创建页面切换控件，显示主要内容
     QStackedWidget *stackedwidget;
-
     VideoViewWidget *widget_videoview;          // 视频监控窗口，由控制器传入
     // VideoSourceWidget *widget_videosource;
     // VideoReplyWidget *widget_videoreply;
     // EventWidget *widget_event;
     // SettingWidget *widget_setting;
+
 };
 
 #endif // WIDGET_H

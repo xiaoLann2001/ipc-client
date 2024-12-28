@@ -55,7 +55,7 @@ public slots:
     void onVideoDisplayUnitClicked(int id_videodisplayunit);  // 视频控件点击槽函数
     void onVideoDisplayUnitRequestMaximizeOrRestore(int id_videodisplayunit);  // 视频控件最大化或还原槽函数
     void onVideoPlay(int index);  // 开启播放指定位置的视频
-    void onVideoStop(int index);  // 停止播放指定位置的视频
+    void onVideoClose(int index); // 停止播放指定位置的视频
     void onVideoSetImage(int index, const QImage &image);  // 设置指定位置的视频图像
 };
 

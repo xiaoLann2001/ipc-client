@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
+QT       += core gui multimedia svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,6 +33,7 @@ SOURCES += \
     src/Video/VideoStream/VideoStreamDecoder.cpp \
     src/Video/VideoStreamController/VideoStreamController.cpp \
     src/Video/VideoStreamManager/VideoStreamManager.cpp \
+    src/Video/VideoView/VideoDisplayTooltip.cpp \
     src/Video/VideoView/VideoDisplayUnit.cpp \
     src/Video/VideoView/VideoDisplayUnitPool.cpp \
     src/Video/VideoView/VideoGridView.cpp \
@@ -45,10 +46,12 @@ HEADERS += \
     src/Application/IPCClientApplication.h \
     src/Application/IPCClientController.h \
     src/Application/IPCClientView.h \
+    src/Video/VideoControlCommand.h \
     src/Video/AudioPlayer/AudioPlayer.h \
     src/Video/VideoStream/VideoStreamDecoder.h \
     src/Video/VideoStreamController/VideoStreamController.h \
     src/Video/VideoStreamManager/VideoStreamManager.h \
+    src/Video/VideoView/VideoDisplayTooltip.h \
     src/Video/VideoView/VideoDisplayUnit.h \
     src/Video/VideoView/VideoDisplayUnitPool.h \
     src/Video/VideoView/VideoGridView.h \
@@ -62,6 +65,12 @@ INCLUDEPATH += src \
     src/Storage \
     src/Video \
     src/Utils
+
+#for test
+HEADERS += 
+SOURCES += 
+INCLUDEPATH += src/Common
+#for test end
 
 QMAKE_CXXFLAGS += -v
 

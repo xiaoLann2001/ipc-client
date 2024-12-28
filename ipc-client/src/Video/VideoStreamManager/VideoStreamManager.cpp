@@ -8,7 +8,11 @@ VideoStreamManager::VideoStreamManager(QObject *parent) : QObject(parent) {}
 VideoStreamManager::~VideoStreamManager() {
     // 停止并清理所有视频流
     for (auto it = m_streams.begin(); it != m_streams.end(); ++it) {
-        deleteVideoStream(it.key());
+        VideoStreamDecoder *decoder = it.value();
+        if (decoder->isRunning()) {         // 如果解码器正在运行
+            decoder->stop();                // 停止解码器
+            decoder->wait();                // 等待解码器线程结束
+        }
     }
 }
 

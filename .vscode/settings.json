@@ -70,6 +70,17 @@
         "qthread": "cpp",
         "qinputdialog": "cpp",
         "qaudioformat": "cpp",
-        "qaudiooutput": "cpp"
-    }
+        "qaudiooutput": "cpp",
+        "qapplication": "cpp",
+        "bit": "cpp",
+        "bitset": "cpp",
+        "cstring": "cpp",
+        "set": "cpp",
+        "iostream": "cpp",
+        "cfenv": "cpp",
+        "qhboxlayout": "cpp",
+        "qtoolbox": "cpp",
+        "qpixmap": "cpp"
+    },
+    "svg.preview.background": "dark-transparent"
 }

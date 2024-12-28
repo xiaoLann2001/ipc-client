@@ -72,7 +72,7 @@ void VideoStreamDecoder::stop() {
     }
 #endif
     resume();  // 唤醒等待的线程
-    wait();
+    wait();    // 等待线程退出
 }
 
 void VideoStreamDecoder::pause() {

@@ -87,6 +87,9 @@ public slots:
     // void onPTZStepChanged(int step);
 
 private:
+    void uiInit();
+    void controlInit();
+
     QHBoxLayout *layout;                            // 视频监控视图页全局布局
     QSplitter *splitter;                            // 窗口分隔器
 
@@ -109,6 +112,7 @@ private:
     QHBoxLayout *layout_videopage;                  // ------ 翻页按钮布局
     QPushButton *pushbutton_prevpage;               // -------- 上一页按钮
     QSpinBox *spinbox_page;                         // -------- 页码输入框
+    QPushButton *pushbutton_jumppage;               // -------- 页码跳转按钮
     QPushButton *pushbutton_nextpage;               // -------- 下一页按钮
     QLabel *label_videostatus;                      // ------ 视频状态标签
 
@@ -117,16 +121,16 @@ private:
     QVBoxLayout *layout_control;                    // -- 视频监控控制布局
     QPushButton *pushbutton_addipc;                 // ---- 添加网络摄像头按钮
     QPushButton *pushbutton_ipclist;                // ---- 网络摄像头列表按钮
-    QGridLayout *gridlayout_videocontrol;           // ---- 视频控制按钮3*3布局
-    QPushButton *pushbutton_videocontrol_pause;     // ------ 暂停按钮
-    QPushButton *pushbutton_videocontrol_resolution;// ------ 分辨率按钮
-    QPushButton *pushbutton_videocontrol_fullscreen;// ------ 全屏按钮
-    QPushButton *pushbutton_videocontrol_snapshot;  // ------ 截图按钮
-    QPushButton *pushbutton_videocontrol_record;    // ------ 录像按钮
-    QPushButton *pushbutton_videocontrol_album;     // ------ 相册按钮
-    QPushButton *pushbutton_videocontrol_osd;       // ------ osd按钮
-    QPushButton *pushbutton_videocontrol_alarm;     // ------ 报警按钮
-    QPushButton *pushbutton_videocontrol_ai;        // ------ AI按钮
+    // QGridLayout *gridlayout_videocontrol;           // ---- 视频控制按钮3*3布局
+    // QPushButton *pushbutton_videocontrol_pause;     // ------ 暂停按钮
+    // QPushButton *pushbutton_videocontrol_resolution;// ------ 分辨率按钮
+    // QPushButton *pushbutton_videocontrol_fullscreen;// ------ 全屏按钮
+    // QPushButton *pushbutton_videocontrol_snapshot;  // ------ 截图按钮
+    // QPushButton *pushbutton_videocontrol_record;    // ------ 录像按钮
+    // QPushButton *pushbutton_videocontrol_album;     // ------ 相册按钮
+    // QPushButton *pushbutton_videocontrol_osd;       // ------ osd按钮
+    // QPushButton *pushbutton_videocontrol_alarm;     // ------ 报警按钮
+    // QPushButton *pushbutton_videocontrol_ai;        // ------ AI按钮
     QLabel *label_ptz_angle;                        // ---- 云台角度信息标签
     QHBoxLayout *layout_ptz_preset;                 // ---- 云台预置点布局
     QLabel *label_ptz_preset;                       // ------ 云台预置点标签

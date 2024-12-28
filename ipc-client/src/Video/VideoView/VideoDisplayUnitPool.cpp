@@ -14,7 +14,7 @@ VideoDisplayUnitPool::VideoDisplayUnitPool(int poolSize)
 VideoDisplayUnitPool::~VideoDisplayUnitPool()
 {
     for (auto widget : m_pool) {
-        delete widget;
+        widget->deleteLater();
     }
 }
 

@@ -2,12 +2,11 @@
 #define IPCCLIENTCONTROLLER_H
 
 #include <QObject>
+#include <QDialog>
+#include <QLabel>
+#include <QPushButton>
 
 #include "IPCClientView.h"
-
-#include "VideoStreamManager/VideoStreamManager.h"
-#include "VideoView/VideoViewWidget.h"
-#include "VideoStreamController/VideoStreamController.h"
 
 class IPCClientController : public QObject
 {
@@ -15,10 +14,16 @@ class IPCClientController : public QObject
 public:
     IPCClientController(IPCClientView *view);
 
+    void controlInit();
+
+signals:
+    void closeApplication();
+
+private slots:
+    void onPushButtonCloseClicked();
+
 private:
-    VideoStreamManager *m_videoStreamManager;
-    VideoViewWidget *m_videoViewWidget;
-    VideoStreamController *m_videoStreamController;
+    IPCClientView *m_ipc_client_view;
 };
 
 #endif // IPCCLIENTCONTROLLER_H
