@@ -8,6 +8,7 @@ VideoStreamController::VideoStreamController(VideoStreamManager *manager, VideoV
 
     // 初始化对话框
     m_inputDialog = new QInputDialog();
+    // m_inputDialog->setModal(false);
     m_inputDialog->setWindowTitle(tr("添加IPC"));
     m_inputDialog->setLabelText(tr("请输入IPC地址:"));
     m_inputDialog->setTextValue("rtsp://192.168.5.185/live/1");
@@ -17,30 +18,35 @@ VideoStreamController::VideoStreamController(VideoStreamManager *manager, VideoV
     m_menu = new QMenu();
     m_addIPCAction = m_menu->addAction(tr("添加IPC"));
     m_removeIPCAction = m_menu->addAction(tr("移除IPC"));
-    
-    // 连接模型层的信号到槽函数
-    connect(m_manager, &VideoStreamManager::newFrameAvailable, this, &VideoStreamController::onNewFrameAvailable);
 
-    // 连接视图层的信号到槽函数
-    connect(m_view, &VideoViewWidget::addIPCClicked, this, &VideoStreamController::onAddIPCClicked);
-
-    connect(m_view, &VideoViewWidget::videoGridChanged, this, &VideoStreamController::onVideoGridChanged);
-    
-    connect(m_view, &VideoViewWidget::videoGridViewClicked, this, &VideoStreamController::onVideoViewClicked);
-    connect(m_view, &VideoViewWidget::videoGridViewRightClicked, this, &VideoStreamController::onVideoViewRightClicked);
+    // 初始化信号与槽
+    controlInit();
 }
 
 VideoStreamController::~VideoStreamController() {
     // 停止所有视频流
-    for (auto it = m_displayUnitToHandle.begin(); it != m_displayUnitToHandle.end(); ++it) {
-        m_manager->deleteVideoStream(it.value());
-    }
+    m_manager->deleteLater();
 
     // 未设置父类，需要手动释放
     delete m_inputDialog;
     delete m_menu;
     delete m_addIPCAction;
     delete m_removeIPCAction;
+}
+
+// 初始化信号与槽
+void VideoStreamController::controlInit() {
+    // 连接模型层的信号到槽函数
+    connect(m_manager, &VideoStreamManager::newFrameAvailable, this, &VideoStreamController::onNewFrameAvailable);
+
+    // 连接视图层的信号到槽函数
+    connect(VideoSignalBus::instance(), &VideoSignalBus::videoControlSignal, this, &VideoStreamController::onVideoControlSignal);
+    connect(m_view, &VideoViewWidget::addIPCClicked, this, &VideoStreamController::onAddIPCClicked);
+
+    connect(m_view, &VideoViewWidget::videoGridChanged, this, &VideoStreamController::onVideoGridChanged);
+
+    connect(m_view, &VideoViewWidget::videoGridViewClicked, this, &VideoStreamController::onVideoViewClicked);
+    connect(m_view, &VideoViewWidget::videoGridViewRightClicked, this, &VideoStreamController::onVideoViewRightClicked);
 }
 
 // 将视频流绑定到指定控件
@@ -60,8 +66,13 @@ void VideoStreamController::unbindViewFromStream(int videoDisplayUnitId) {
 
 // 根据控件 ID 创建视频流
 void VideoStreamController::createVideoStreamfromViewId(int videoDisplayUnitId, const QString &url) {
-    int handle = m_manager->createVideoStream(url);  // 创建视频流
-    bindViewToStream(videoDisplayUnitId, handle);     // 将视频流绑定到指定控件
+    // 若控件 ID 已经有视频流，则不再创建
+    if (m_displayUnitToHandle.contains(videoDisplayUnitId)) {
+        qDebug() << "window " << videoDisplayUnitId << " already has a video stream.";
+        return;
+    }
+    int handle = m_manager->createVideoStream(url);     // 创建视频流
+    bindViewToStream(videoDisplayUnitId, handle);       // 将视频流绑定到指定控件
 }
 
 // 根据控件 ID 删除视频流
@@ -108,6 +119,15 @@ QString VideoStreamController::getUserOptionFromMenu(const QPoint &pos) {
 
 
 /*--------------------用于响应视图层的槽函数------------------------------------*/
+
+void VideoStreamController::onVideoControlSignal(const VideoControlCommand &command) {
+    qDebug() << "VideoControlCommand: " << command.id << " " << command.cmd;
+    if (command.cmd == VideoControlCommand::Add) {
+        onAddVideoStream(command.id, command.param.toString());
+    } else if (command.cmd == VideoControlCommand::Close) {
+        onStopVideoDisplay(command.id);
+    }
+}
 
 void VideoStreamController::onAddVideoStream(int videoDisplayUnitId, const QString &url) {
     Q_UNUSED(videoDisplayUnitId);

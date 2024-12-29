@@ -70,19 +70,17 @@ void IPCClientApplication::videoInit()
 
 void IPCClientApplication::onApplicationClose()
 {
-    // 释放资源
-    if (m_videoStreamManager)
-    {
-        delete m_videoStreamManager;    // 调用视频管理模块的析构函数，以等待所有线程结束
-        m_videoStreamManager = nullptr;
-    }
-
     // 退出应用程序
     exit(0);
 }
 
+#include <QFrame>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPainter>
+
 void IPCClientApplication::testUiInit()
 {
-    // 测试界面
     
 }

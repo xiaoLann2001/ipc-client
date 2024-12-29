@@ -25,7 +25,8 @@ void VideoViewWidget::uiInit()
 
     // 创建水平分隔器
     splitter = new QSplitter(Qt::Horizontal, this); // 创建水平分隔器
-    splitter->setHandleWidth(0); // 设置分隔条的宽度
+    splitter->setHandleWidth(2); // 设置分隔条的宽度
+    splitter->setStyleSheet("QSplitter::handle{background-color: #383838;}"); // 设置分隔条的颜色
 
     /*--------------------事件略缩图子窗口-------------------------------------*/
 

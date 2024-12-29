@@ -17,6 +17,9 @@ IPCClientView::~IPCClientView()
 
 void IPCClientView::uiInit() 
 {
+    // 设置无边框窗口
+    // setWindowFlags(Qt::FramelessWindowHint);
+
     // 创建页面布局，分为从上至下分别为顶部布局、页面切换控件、其他信息布局
     layout = new QVBoxLayout();
 
@@ -42,16 +45,16 @@ void IPCClientView::uiInit()
     pushButton_page_videoevent = new QPushButton("event");
     pushButton_page_videosetting = new QPushButton("setting");
     // 设置菜单按钮样式
-    QString button_style = "                                    \
+    QString button_page_style = "                                    \
         QPushButton {                                           \
             min-height: 40px;                                   \
             font-size: 16px;                                    \
         }";
-    pushButton_page_videoview->setStyleSheet(button_style);
-    pushButton_page_videosource->setStyleSheet(button_style);
-    pushButton_page_videoreply->setStyleSheet(button_style);
-    pushButton_page_videoevent->setStyleSheet(button_style);
-    pushButton_page_videosetting->setStyleSheet(button_style);
+    pushButton_page_videoview->setStyleSheet(button_page_style);
+    pushButton_page_videosource->setStyleSheet(button_page_style);
+    pushButton_page_videoreply->setStyleSheet(button_page_style);
+    pushButton_page_videoevent->setStyleSheet(button_page_style);
+    pushButton_page_videosetting->setStyleSheet(button_page_style);
     // 添加菜单按钮到布局
     layout_menu->addWidget(pushButton_page_videoview);
     layout_menu->addWidget(pushButton_page_videosource);
@@ -64,17 +67,31 @@ void IPCClientView::uiInit()
     layout_otherinfo->setContentsMargins(0, 0, 0, 0); // 设置布局边距
     layout_windowcontrol = new QHBoxLayout();
     layout_windowcontrol->setContentsMargins(0, 0, 0, 0); // 设置布局边距
-    pushButton_minimize = new QPushButton("最小化");
-    pushButton_maximize = new QPushButton("最大化");
-    pushButton_close = new QPushButton("关闭");
+    pushButton_minimize = new QPushButton(this);    // 最小化按钮
+    pushButton_maximize = new QPushButton(this);    // 最大化按钮
+    pushButton_close = new QPushButton(this);       // 关闭按钮
     // 设置窗口控制按钮样式
     // pushButton_minimize->setIcon(QIcon(":/icons/minimize.png"));
     pushButton_maximize->setIcon(QIcon(":/icons/maximize.png"));
-    pushButton_maximize->setIconSize(pushButton_maximize->size());
+    // pushButton_maximize->setIconSize(pushButton_maximize->size());
     // pushButton_close->setIcon(QIcon(":/icons/close.png"));
-    pushButton_minimize->setStyleSheet("background-color: transparent;");
-    pushButton_maximize->setStyleSheet("background-color: transparent;");
-    pushButton_close->setStyleSheet("background-color: transparent;");
+    QString button_window_control_style = "                 \
+        QPushButton {                                       \
+            min-width: 12px;                                \
+            min-height: 12px;                               \
+            background-color: rgba(0, 0, 0, 0);             \
+            color: white;                                   \
+            border-radius: 3px;                             \
+        }                                                   \
+        QPushButton:hover {                                 \
+            background-color: rgba(255, 255, 255, 64);      \
+        }                                                   \
+        QPushButton:!hover:!pressed {                       \
+            background-color: rgba(0, 0, 0, 0);             \
+        }";
+    pushButton_minimize->setStyleSheet(button_window_control_style);
+    pushButton_maximize->setStyleSheet(button_window_control_style);
+    pushButton_close->setStyleSheet(button_window_control_style);
     // 添加窗口控制按钮到布局
     layout_windowcontrol->addWidget(pushButton_minimize);
     layout_windowcontrol->addWidget(pushButton_maximize);
@@ -145,6 +162,9 @@ void IPCClientView::controlInit()
 
 void IPCClientView::paintEvent(QPaintEvent *event)
 {
+    static int count = 0;
+    qDebug() << "IPCClientView::paintEvent" << count++;
+
     // 创建 QPainter 对象
     QPainter painter(this);
 

@@ -2,7 +2,7 @@
 
 #include "AudioPlayer.h"
 
-AudioPlayer::AudioPlayer(QObject *parent)
+AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), audioOutput(nullptr), deviceOutput(nullptr), muted(false)
 {
 }
 

@@ -62,7 +62,9 @@ public:
     explicit VideoStreamDecoder(const QString &url, QObject *parent = nullptr);
     ~VideoStreamDecoder();
 
+#if 0
     void stop();                            // 停止解码线程
+#endif
     void pause();                           // 暂停解码线程
     void resume();                          // 恢复解码线程
 

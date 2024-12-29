@@ -14,19 +14,17 @@ class VideoDisplayUnit : public QWidget
 {
     Q_OBJECT
 public:
+    explicit VideoDisplayUnit(QWidget *parent = nullptr);
     explicit VideoDisplayUnit(int id, QWidget *parent = nullptr);
 
+    void setId(int id) { m_id_ = id; }
+    void setInfo(const QString &info) { m_info_ = info; }
     void setImage(const QImage &image);
     int getId() const { return m_id_; }
 
 protected:
     // 绘图事件处理函数
     void paintEvent(QPaintEvent *event) override;
-    
-    // 与悬浮窗有关事件
-    void enterEvent(QEvent *event) override;
-    void leaveEvent(QEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
 
 signals:
 
@@ -36,8 +34,6 @@ public slots:
     void onClose();     // 停止槽函数
 
 private:
-    // 初始化悬浮窗口
-    void tooltipInit();
 
     // 窗口标识
     int m_id_ = -1;                 // 唯一 ID
@@ -52,9 +48,6 @@ private:
     // 窗口控制信息
     bool m_isplaying_ = false;      // 是否正在播放
     QMutex mtx_playing_;            // 互斥锁，保护播放状态
-
-    // 悬浮窗口
-    VideoDisplayTooltip *m_tooltip_;    // 悬浮窗口
 };
 
 #endif // VIDEODISPLAYUNIT_H

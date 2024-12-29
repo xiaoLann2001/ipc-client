@@ -38,8 +38,16 @@ VideoStreamDecoder::VideoStreamDecoder(const QString &url, QObject *parent)
 }
 
 VideoStreamDecoder::~VideoStreamDecoder() {
-    stop();
-    cleanup();
+    if (isRunning()) {
+        {
+            QMutexLocker locker(&m_stopMutex);
+            m_stop = true;  // 设置停止标志
+        }
+        resume();   // 唤醒等待的线程
+        quit();     // 退出线程事件循环
+        wait();     // 等待线程退出
+        cleanup();  // 清理资源
+    }
 }
 
 VideoStreamInfo* VideoStreamDecoder::getVideoStreamInfo() { 
@@ -55,6 +63,7 @@ VideoStreamInfo* VideoStreamDecoder::getVideoStreamInfo() {
     return m_info; 
 }
 
+#if 0
 void VideoStreamDecoder::stop() {
     {
         // 使用互斥锁保护共享变量，注意加锁的粒度，如果将整个 stop 函数加锁，会导致线程无法退出
@@ -71,9 +80,8 @@ void VideoStreamDecoder::stop() {
         m_audioQueue.clear();
     }
 #endif
-    resume();  // 唤醒等待的线程
-    wait();    // 等待线程退出
 }
+#endif
 
 void VideoStreamDecoder::pause() {
     QMutexLocker locker(&m_pauseMutex);
@@ -109,6 +117,11 @@ void VideoStreamDecoder::run() {
             if (m_paused) {
                 m_pauseCondition.wait(&m_pauseMutex);  // 等待继续信号
             }
+        }
+
+        {
+            QMutexLocker locker(&m_stopMutex);
+            if (m_stop) return;
         }
 
         // 读取数据包
@@ -163,7 +176,9 @@ bool VideoStreamDecoder::init() {
     }
 #endif
     // 初始化帧
-    this->initFrame();
+    if (!initFrame()) {
+        return false;
+    }
 
     // 输出视频信息
     av_dump_format(m_pFormatCtx, 0, m_url.toStdString().data(), 0);
@@ -256,7 +271,6 @@ bool VideoStreamDecoder::initVideo() {
     }
     if (m_videoStreamIdx == -1) {
         qDebug() << "Could not find video stream";
-        cleanup();
         return false;
     }
     
@@ -280,7 +294,6 @@ bool VideoStreamDecoder::initVideo() {
     }
     if (m_pCodec == nullptr) {
         qDebug() << "Could not find video codec";
-        cleanup();
         return false;
     }
     // 打印解码器信息
@@ -290,21 +303,18 @@ bool VideoStreamDecoder::initVideo() {
     m_pCodecCtx = avcodec_alloc_context3(m_pCodec);
     if (!m_pCodecCtx) {
         qWarning() << "Could not allocate codec context";
-        cleanup();
         return false;
     }
 
     // 将流的编码参数复制到解码器上下文
     if (avcodec_parameters_to_context(m_pCodecCtx, video_codecParams) < 0) {
         qWarning() << "Failed to copy codec parameters to decoder context";
-        cleanup();
         return false;
     }
 
     // 打开解码器
     if (avcodec_open2(m_pCodecCtx, m_pCodec, nullptr) < 0) {
         qWarning() << "Could not open codec";
-        cleanup();
         return false;
     }
 
@@ -573,4 +583,20 @@ void VideoStreamDecoder::cleanup() {
         av_dict_free(&options);
         options = NULL;
     }
+
+    // 释放队列
+    {
+        QMutexLocker locker(&m_queueMutex);
+        if (!m_frameQueue.isEmpty()) {
+            m_frameQueue.clear();
+        }
+    }
+#if AudioDecoderEnabled
+    {
+        QMutexLocker locker(&m_audioQueueMutex);
+        if (!m_audioQueue.isEmpty()) {
+            m_audioQueue.clear();
+        }
+    }
+#endif
 }

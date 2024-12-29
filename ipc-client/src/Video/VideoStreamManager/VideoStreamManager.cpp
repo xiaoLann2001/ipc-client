@@ -1,18 +1,18 @@
 #include "VideoStreamManager/VideoStreamManager.h"
 #include <QDebug>
 
-QSet<int> VideoStreamManager::recycledHandles;  // 静态成员变量初始化
-
 VideoStreamManager::VideoStreamManager(QObject *parent) : QObject(parent) {}
 
-VideoStreamManager::~VideoStreamManager() {
-    // 停止并清理所有视频流
-    for (auto it = m_streams.begin(); it != m_streams.end(); ++it) {
-        VideoStreamDecoder *decoder = it.value();
-        if (decoder->isRunning()) {         // 如果解码器正在运行
-            decoder->stop();                // 停止解码器
-            decoder->wait();                // 等待解码器线程结束
-        }
+VideoStreamManager::~VideoStreamManager() { 
+    // 获取所有句柄到列表，避免迭代过程中删除元素
+    QList<int> handles;
+    {
+        QMutexLocker locker(&m_mutex_streamMap);
+        handles = m_streams.keys();
+    }
+    // 删除所有视频流
+    for (int handle : handles) {
+        deleteVideoStream(handle);
     }
 }
 
@@ -74,15 +74,19 @@ int VideoStreamManager::createVideoStream(const QString &url) {
 }
 
 void VideoStreamManager::deleteVideoStream(int handle) {
-    if (m_streams.contains(handle)) {       // 如果句柄对应的解码器存在
-        VideoStreamDecoder *decoder = m_streams[handle];    // 获取解码器
-        if (decoder->isRunning()) {         // 如果解码器正在运行
-            decoder->stop();                // 停止解码器
-            decoder->wait();                // 等待解码器线程结束
+    // 保护 m_streams 的互斥锁
+    QMutexLocker locker(&m_mutex_streamMap);
+
+    if (m_streams.contains(handle)) {
+        VideoStreamDecoder *decoder = m_streams.take(handle);
+        if (decoder) {
+            // 断开所有连接，防止自动删除
+            disconnect(decoder, nullptr, nullptr, nullptr); 
+            // 删除解码器
+            decoder->deleteLater();
         }
-        decoder->deleteLater();             // 安全删除解码器
-        m_streams.remove(handle);           // 从映射中移除
-        recycleHandle(handle);              // 回收句柄
+        m_streams.remove(handle);
+        recycleHandle(handle);
     }
 }
 

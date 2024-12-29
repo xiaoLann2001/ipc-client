@@ -7,8 +7,9 @@
 #include <QSpacerItem>
 #include <QPainter>
 #include <QHBoxLayout>
+#include <QEvent>
 
-#include "VideoControlCommand.h"
+#include "VideoSignalBus.h"
 
 class VideoDisplayTooltip : public QWidget
 {
@@ -16,23 +17,24 @@ class VideoDisplayTooltip : public QWidget
 public:
     explicit VideoDisplayTooltip(QWidget *parent = nullptr);
 
-    void setTooltipText(const QString &text);
-    void setTooltipMode(bool haveAddIPC);
-    int getId() const { return m_id_; }
-    void setId(int id) { m_id_ = id; }
+    void setTooltipText(const QString &text);           // 设置悬浮窗口显示文本
+    void setTooltipMode(bool haveAddIPC);               // 设置悬浮窗口显示模式
+    int getId() const { return m_id_; }                 // 获取 ID
+    void setId(int id) { m_id_ = id; }                  // 设置 ID
 
 protected:
+    bool eventFilter(QObject *watched, QEvent *event);
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
 signals:
-    void videoControlSignal(VideoControlCommand command);
+    // 已通过信号总线发送
+    // void videoControlSignal(VideoControlCommand command);
 
 private:
-    void tooltipInit();         // 初始化悬浮窗口
-    void controlInit();         // 初始化控制按钮
-    // void updateTooltip();    // 更新悬浮窗口
-    void setTooltipLabel(const QString &text) { label_videoInfo->setText(text); }  // 设置悬浮窗口标签文本
+    void tooltipInit();                     // 初始化悬浮窗口
+    void controlInit();                     // 初始化控制按钮
+    // void updateTooltip();                // 更新悬浮窗口
 
     int m_id_;                              // 唯一 ID
 
@@ -40,7 +42,7 @@ private:
     QLabel *label_videoInfo;                // 悬浮窗口标签
 
     // 未添加视频流时的控制按钮
-    QPushButton *push_button_addIPC;        // 添加网络摄像头按钮
+    QPushButton *push_button_add;           // 添加视频按钮
 
     // 已添加视频流时的控制按钮
     QPushButton *push_button_playOrPause;   // 播放或暂停按钮
@@ -48,7 +50,7 @@ private:
     QPushButton *push_button_record;        // 录像按钮
     QPushButton *push_button_fullscreen;    // 全屏按钮
     QPushButton *push_button_ai;            // AI启停按钮
-    QPushButton *push_button_closeIPC;      // 关闭网络摄像头按钮
+    QPushButton *push_button_close;         // 关闭视频按钮
 };
 
 #endif // VIDEODISPLAYTOOLTIP_H
