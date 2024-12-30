@@ -130,15 +130,18 @@ void VideoOpenGL::initializeGL()
                                          "}\n";
 
     this->m->m_program = new QOpenGLShaderProgram;
+    // 加载顶点着色器和片段着色器
     this->m->m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, version_shader_code(vertex_shader_source));
     this->m->m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, version_shader_code(fragment_shader_source));
+    // 编译着色器(shader)
     this->m->m_program->link();
     this->m->m_program->bind();
+    // 设置纹理采样器
     this->m->m_program->setUniformValue("texture_y", 0);
     this->m->m_program->setUniformValue("texture_u", 1);
     this->m->m_program->setUniformValue("texture_v", 2);
 
-#if 1
+#if 0
     static const GLfloat vertex_vertices[] = {
         -1.0f,  -1.0f,
          1.0f,  -1.0f,
@@ -158,23 +161,11 @@ void VideoOpenGL::initializeGL()
     f->glEnableVertexAttribArray(0);
     f->glEnableVertexAttribArray(1);
 #else
-    static const GLfloat vertices[] = {
-        -1.0f,
-        -1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        0.0f,
+    static const GLfloat vertices[] = { // 每行两个顶点坐标，两个纹理坐标
+        -1.0f,  -1.0f,  0.0f,   1.0f,
+        1.0f,   -1.0f,  1.0f,   1.0f,
+        -1.0f,  1.0f,   0.0f,   0.0f,
+        1.0f,   1.0f,   1.0f,   0.0f,
     };
 
     this->m->m_vao = new QOpenGLVertexArrayObject(this);
