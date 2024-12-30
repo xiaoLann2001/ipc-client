@@ -3,11 +3,8 @@
 
 VideoViewWidget::VideoViewWidget(QWidget *parent) : QWidget(parent)
 {
-    // 初始化界面
-    uiInit();
-
-    // 初始化控制
-    controlInit();
+    uiInit();       // 初始化界面
+    controlInit();  // 初始化信号与槽
 }
 
 // 获取网格数
