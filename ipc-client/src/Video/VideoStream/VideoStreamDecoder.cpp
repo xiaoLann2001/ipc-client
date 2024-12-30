@@ -1,14 +1,6 @@
 #include "VideoStream/VideoStreamDecoder.h"
 #include <QDebug>
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/opt.h>
-}
-
 VideoStreamDecoder::VideoStreamDecoder(const QString &url, QObject *parent)
     : QThread(parent), m_url(url) {
     // 使用前，需要将 AVDictionary 指针初始化为 nullptr
@@ -27,6 +19,8 @@ VideoStreamDecoder::VideoStreamDecoder(const QString &url, QObject *parent)
     m_pAudioCodecCtx = nullptr;
     m_pAudioCodec = nullptr;
     m_pAudioFrame = nullptr;
+    m_pAudioFrameResampled = nullptr;
+    m_pSwrCtx = nullptr;
     m_audioStreamIdx = -1;
 #endif
     // 视频流基本信息
@@ -379,7 +373,7 @@ bool VideoStreamDecoder::initAudio() {
 #endif
 
 bool VideoStreamDecoder::initFrame() {
-    // 初始化 RGB 帧
+    // 初始化视频帧
     m_pFrame = av_frame_alloc();
     if (!m_pFrame) {
         qWarning() << "Could not allocate frame";
@@ -387,6 +381,7 @@ bool VideoStreamDecoder::initFrame() {
         return false;
     }
 
+    // 初始化 RGB 格式视频帧
     m_pFrameRGB = av_frame_alloc();
     if (!m_pFrameRGB) {
         qWarning() << "Could not allocate RGB frame";
@@ -402,9 +397,14 @@ bool VideoStreamDecoder::initFrame() {
                          m_pCodecCtx->width, m_pCodecCtx->height, 1);
 
     // 初始化转换器
+    int srcWidth = m_pCodecCtx->width;
+    int srcHeight = m_pCodecCtx->height;
     AVPixelFormat srcFormat = m_pCodecCtx->pix_fmt;
+    int dstWidth = m_pCodecCtx->width;
+    int dstHeight = m_pCodecCtx->height;
     AVPixelFormat dstFormat = AV_PIX_FMT_RGB24;
     int flag = SWS_FAST_BILINEAR;
+
     m_pSwsCtx = sws_getContext(m_pCodecCtx->width, m_pCodecCtx->height, srcFormat,
                                m_pCodecCtx->width, m_pCodecCtx->height, dstFormat, flag,
                                nullptr, nullptr, nullptr);
@@ -413,6 +413,7 @@ bool VideoStreamDecoder::initFrame() {
         cleanup();
         return false;
     }
+
 #if AudioDecoderEnabled
     // 初始化音频帧
     m_pAudioFrame = av_frame_alloc();
@@ -420,6 +421,41 @@ bool VideoStreamDecoder::initFrame() {
         qWarning() << "Could not allocate audio frame";
         return false;
     }
+
+    // 初始化重采样后的音频帧
+    m_pAudioFrameResampled = av_frame_alloc();
+    if (!m_pAudioFrameResampled) {
+        qWarning() << "Could not allocate resampled audio frame";
+        return false;
+    }
+
+    // 创建音频重采样上下文
+    m_pSwrCtx = swr_alloc();
+    if (!m_pSwrCtx) {
+        qWarning() << "Could not allocate resample context";
+        return false;
+    }
+
+    // 设置重采样参数
+    int srcSampleRate = m_pAudioCodecCtx->sample_rate;
+    enum AVSampleFormat srcSampleFmt = m_pAudioCodecCtx->sample_fmt;
+    uint64_t srcChannelLayout = m_pAudioCodecCtx->channel_layout;
+    int dstSampleRate = 44100;
+    enum AVSampleFormat dstSampleFmt = AV_SAMPLE_FMT_S16;
+    uint64_t dstChannelLayout = AV_CH_LAYOUT_STEREO;
+    av_opt_set_int(m_pSwrCtx, "in_sample_rate", srcSampleRate, 0);
+    av_opt_set_sample_fmt(m_pSwrCtx, "in_sample_fmt", srcSampleFmt, 0);
+    av_opt_set_channel_layout(m_pSwrCtx, "in_channel_layout", srcChannelLayout, 0);
+    av_opt_set_int(m_pSwrCtx, "out_sample_rate", dstSampleRate, 0);
+    av_opt_set_sample_fmt(m_pSwrCtx, "out_sample_fmt", dstSampleFmt, 0);
+    av_opt_set_channel_layout(m_pSwrCtx, "out_channel_layout", dstChannelLayout, 0);
+
+    // 初始化重采样上下文
+    if (swr_init(m_pSwrCtx) < 0) {
+        qWarning() << "Failed to initialize the resampling context";
+        return false;
+    }
+
 #endif
     return true;
 }
@@ -460,23 +496,7 @@ void VideoStreamDecoder::decodeVideo(const AVPacket &packet) {
             return;
         }
 
-        // 转换为 RGB 格式
-        sws_scale(m_pSwsCtx, m_pFrame->data, m_pFrame->linesize, 0, m_pCodecCtx->height,
-                m_pFrameRGB->data, m_pFrameRGB->linesize);
-
-        // 将 RGB 数据转换为 QImage
-        QImage img(m_pFrameRGB->data[0], m_pCodecCtx->width, m_pCodecCtx->height, 
-                m_pFrameRGB->linesize[0], QImage::Format_RGB888);
-        // 将图像放入队列
-        {
-            QMutexLocker locker(&m_queueMutex);
-            if (m_frameQueue.size() >= m_maxQueueSize) {
-                m_frameQueue.dequeue();  // 从队列中移除一帧
-            }
-            m_frameQueue.enqueue(img);  // 将图像放入队列
-        }
-
-        emit videoFrameReady();
+        processVideoFrame();
     }
 }
 
@@ -501,21 +521,64 @@ void VideoStreamDecoder::decodeAudio(const AVPacket &packet) {
             return;
         }
 
-        // 获取解码后的 PCM 数据
-        uint8_t *pcmData = m_pAudioFrame->data[0];
-        int pcmSize = m_pAudioFrame->linesize[0];
-
-        // 存入音频缓冲队列
-        {
-            QMutexLocker locker(&m_audioQueueMutex);
-            if (m_audioQueue.size() >= m_maxAudioQueueSize) {
-                m_audioQueue.dequeue();  // 从队列中移除一帧
-            }
-            m_audioQueue.enqueue(QByteArray((char *)pcmData, pcmSize));
-        }
-
-        emit audioFrameReady();
+        // 处理音频帧
+        processAudioFrame();
     }
+}
+#endif
+
+void VideoStreamDecoder::processVideoFrame() {
+    // 转换为 RGB 格式
+    int ret = sws_scale(m_pSwsCtx, m_pFrame->data, m_pFrame->linesize, 0, m_pCodecCtx->height,
+            m_pFrameRGB->data, m_pFrameRGB->linesize);
+    if (ret < 0) {
+        qWarning() << "Error while converting";
+        return;
+    }
+
+    // 将 RGB 数据转换为 QImage
+    QImage img(m_pFrameRGB->data[0], m_pCodecCtx->width, m_pCodecCtx->height, 
+            m_pFrameRGB->linesize[0], QImage::Format_RGB888);
+    
+    // 将图像放入队列
+    {
+        QMutexLocker locker(&m_queueMutex);
+        if (m_frameQueue.size() >= m_maxQueueSize) {
+            m_frameQueue.dequeue();  // 从队列中移除一帧
+        }
+        m_frameQueue.enqueue(img);  // 将图像放入队列
+    }
+
+    emit videoFrameReady();
+}
+
+#if AudioDecoderEnabled
+void VideoStreamDecoder::processAudioFrame() {
+    // 重采样音频帧
+    int nb_samples = m_pAudioFrame->nb_samples;
+    int dst_nb_samples = av_rescale_rnd(swr_get_delay(m_pSwrCtx, m_pAudioCodecCtx->sample_rate) + nb_samples,
+                                        m_pAudioCodecCtx->sample_rate, m_pAudioCodecCtx->sample_rate, AV_ROUND_UP);
+    int ret = swr_convert(m_pSwrCtx, m_pAudioFrameResampled->data, dst_nb_samples,
+                          (const uint8_t **)m_pAudioFrame->data, nb_samples);
+    if (ret < 0) {
+        qWarning() << "Error while converting";
+        return;
+    }
+
+    // 计算重采样后的音频数据大小
+    int resampledSize = av_samples_get_buffer_size(nullptr, m_pAudioCodecCtx->channels, ret,
+                                                   m_pAudioCodecCtx->sample_fmt, 1);
+
+    // 将音频数据放入队列
+    {
+        QMutexLocker locker(&m_audioQueueMutex);
+        if (m_audioQueue.size() >= m_maxAudioQueueSize) {
+            m_audioQueue.dequeue();  // 从队列中移除一帧
+        }
+        m_audioQueue.enqueue(QByteArray((const char *)m_pAudioFrameResampled->data[0], resampledSize));  // 将音频数据放入队列
+    }
+
+    emit audioFrameReady();
 }
 #endif
 

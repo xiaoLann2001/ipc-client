@@ -13,10 +13,14 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
+#include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/samplefmt.h>
 }
 
-#define AudioDecoderEnabled 1
+#define AudioDecoderEnabled 0
 
 // 视频流信息
 class VideoStreamInfo {
@@ -105,6 +109,10 @@ private:
 #if AudioDecoderEnabled
     void decodeAudio(const AVPacket &packet);    // 解码视频帧
 #endif
+    void processVideoFrame();               // 处理视频帧
+#if AudioDecoderEnabled
+    void processAudioFrame();               // 处理音频帧
+#endif
     void cleanup();                         // 清理资源
 
     AVDictionary *options;          // FFmpeg 参数
@@ -124,6 +132,8 @@ private:
     AVCodecContext *m_pAudioCodecCtx;  // 音频编解码器上下文
     const AVCodec *m_pAudioCodec;   // 音频编解码器
     AVFrame *m_pAudioFrame;         // 音频帧
+    AVFrame *m_pAudioFrameResampled;// 重采样后的音频帧
+    SwrContext *m_pSwrCtx;          // 音频重采样器
     int m_audioStreamIdx;           // 音频流索引
 #endif
     // 视频流基本信息
