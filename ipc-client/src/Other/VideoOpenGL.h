@@ -3,18 +3,11 @@
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
-#include <QMutex>
-
-QT_BEGIN_NAMESPACE
-class QOpenGLTexture;
-class QOpenGLShaderProgram;
-class QOpenGLBuffer;
-class QOpenGLVertexArrayObject;
-QT_END_NAMESPACE
-
-// namespace common {
-
-// namespace qt {
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLTexture>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
 
 class VideoOpenGL : public QOpenGLWidget, protected QOpenGLFunctions
 {
@@ -36,8 +29,8 @@ public:
     VideoOpenGL(QWidget *parent = nullptr);
     ~VideoOpenGL();
 
-    void set_image_size(const int &width, const int &height, const ImageFormat &farmat);
-    void update_image(char *data_ptr);
+    void setImageSize(const int &width, const int &height, const ImageFormat &farmat);
+    void updateImage(char *data_ptr);
 
 protected:
     void initializeGL() override;
@@ -49,9 +42,5 @@ private:
     struct impl;
     struct impl *m;
 };
-
-// }
-
-// }
 
 #endif // VIDEOOPENGL_H

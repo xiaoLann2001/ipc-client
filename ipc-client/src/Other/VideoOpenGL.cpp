@@ -1,13 +1,6 @@
-#include "VideoOpenGL.h"
-
-#include <QOpenGLTexture>
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLShaderProgram>
 #include <iostream>
-#include <QPainter>
 
-// using namespace common::qt;
+#include "VideoOpenGL.h"
 
 QByteArray version_shader_code(const char *src);
 
@@ -308,7 +301,7 @@ void VideoOpenGL::paintGL()
 //     // painter.fillRect(0, 0, 100, 100, Qt::green);
 // }
 
-void VideoOpenGL::set_image_size(const int &width, const int &height, const ImageFormat &format)
+void VideoOpenGL::setImageSize(const int &width, const int &height, const ImageFormat &format)
 {
     this->m->m_video_w = width;
     this->m->m_video_h = height;
@@ -347,14 +340,9 @@ void VideoOpenGL::set_image_size(const int &width, const int &height, const Imag
     this->m->m_video_ptr = new char[this->m->m_image_size];
 }
 
-void VideoOpenGL::update_image(char *data_ptr)
+void VideoOpenGL::updateImage(char *data_ptr)
 {
-    if (!this->m->m_video_ptr || !data_ptr)
-    {
-        return;
-    }
-
+    if (!this->m->m_video_ptr || !data_ptr) return;
     memcpy(this->m->m_video_ptr, data_ptr, this->m->m_image_size);
-
     update();
 }
