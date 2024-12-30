@@ -15,6 +15,11 @@
 #include <QPainter>
 #include <QVector>
 
+#define TESE_REPAINT_COUNT 0
+#if TESE_REPAINT_COUNT
+#include <QTimer>
+#endif
+
 enum VideoGrid
 {
     VideoGridOne = 1,
@@ -56,20 +61,29 @@ private:
     void adjustDisplayUnits();                  // 调整控件数量
     void addDisplayUnit();                      // 添加视频显示控件
     void removeDisplayUnit();                   // 移除视频显示控件
+    void resetSelectedIndex();                  // 重置选中索引
 
     int m_video_grid_ = 0;                      // 视频网格布局
     int m_selected_index_ = -1;                 // 选中的视频控件索引
     int m_maximized_index_ = -1;                // 最大化的视频控件索引
+    QMutex mtx_grid_;                           // 网格互斥锁, 保护网格变量
+    QMutex mtx_selected_index_;                 // 选中索引互斥锁, 保护选中索引变量
+    QMutex mtx_maximized_index_;                // 最大化索引互斥锁, 保护最大化索引变量
 
-    // VideoDisplayUnitPool *m_pool_;                               // 控件池
+    // VideoDisplayUnitPool *m_pool_;                                  // 控件池
     CustomQWidgetPool<VideoDisplayUnit> *m_displayUnitPool_;        // 显示控件池
     CustomQWidgetPool<VideoDisplayTooltip> *m_displayTooltipPool_;  // 悬浮窗控件池
     QVector<VideoDisplayUnit*> m_displayviews_;                     // 存储视频显示控件指针
     QVector<QRect> m_display_geometries_;                           // 存储视频显示控件的几何信息
+    // QMutex mtx_displayviews_;                                       // 互斥锁，保护视频显示控件数组
 
-    QMutex mtx_grid_;                           // 网格互斥锁, 保护网格变量
-    QMutex mtx_selected_index_;                 // 选中索引互斥锁, 保护选中索引变量
-    QMutex mtx_maximized_index_;                // 最大化索引互斥锁, 保护最大化索引变量
+
+
+#if TESE_REPAINT_COUNT
+    // test
+    int m_test_repaint_count_ = 0;
+    QTimer m_test_timer_;
+#endif
 };
 
 #endif // VIDEOGRIDVIEW_H

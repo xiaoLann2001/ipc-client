@@ -15,6 +15,14 @@ VideoGridView::VideoGridView(QWidget *parent) : QWidget(parent)
     m_maximized_index_ = -1;
 
     UIInit();
+
+#if TESE_REPAINT_COUNT
+    connect(&m_test_timer_, &QTimer::timeout, this, [this]() {
+        qDebug() << "VideoGridView::m_test_repaint_count_: " << m_test_repaint_count_;
+        m_test_repaint_count_ = 0;
+    });
+    m_test_timer_.start(1000);
+#endif
 }
 
 VideoGridView::~VideoGridView()
@@ -40,6 +48,13 @@ void VideoGridView::setGrid(VideoGrid grid)
         m_maximized_index_ = -1;
     }
 
+    // 如果有控件选中，先取消选中
+    if (m_selected_index_ != -1)
+    {
+        QMutexLocker locker(&mtx_selected_index_);
+        m_selected_index_ = -1;
+    }
+
     // 更新网格布局
     {
         QMutexLocker locker(&mtx_grid_);
@@ -50,11 +65,14 @@ void VideoGridView::setGrid(VideoGrid grid)
     }
     adjustDisplayUnits();
 
-    // update(); // 触发重绘
+    update(); // 触发重绘
 }
 
 void VideoGridView::UIInit()
 {
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAttribute(Qt::WA_NoSystemBackground, true);
+
     // m_pool_ = new VideoDisplayUnitPool(16); // 创建控件池
     m_displayUnitPool_ = new CustomQWidgetPool<VideoDisplayUnit>(16);       // 创建显示控件池
     m_displayTooltipPool_ = new CustomQWidgetPool<VideoDisplayTooltip>(16); // 创建悬浮窗池
@@ -87,7 +105,7 @@ void VideoGridView::calculateGridLayout()
         break;
     }
 
-    int spacing = 3;
+    int spacing = 2;
     int displayWidth = (width() - (cols + 1) * spacing) / cols;
     int displayHeight = (height() - (rows + 1) * spacing) / rows;
 
@@ -123,19 +141,20 @@ void VideoGridView::adjustDisplayUnits()
         // 释放控件
         while (target_grid < m_displayviews_.size())
         {
-            addDisplayUnit();
+            removeDisplayUnit();
         }
     }
     else if (target_grid > m_displayviews_.size())
     {
+        // 添加控件
         while (target_grid > m_displayviews_.size())
         {
-            removeDisplayUnit();
+            addDisplayUnit();
         }
     }
 }
 
-void VideoGridView::addDisplayUnit()
+void VideoGridView::removeDisplayUnit()
 {
     // 获取显示控件
     VideoDisplayUnit *display = m_displayviews_.back();
@@ -170,7 +189,7 @@ void VideoGridView::addDisplayUnit()
     m_displayTooltipPool_->release(tooltip);
 }
 
-void VideoGridView::removeDisplayUnit()
+void VideoGridView::addDisplayUnit()
 {
     // 获取显示控件
     VideoDisplayUnit *display = m_displayUnitPool_->acquire(this);
@@ -196,10 +215,10 @@ void VideoGridView::removeDisplayUnit()
 
     display->setId(m_displayviews_.size()); // 设置子窗口 ID
     display->installEventFilter(this);      // 安装本窗口的事件过滤器，用于处理子窗口的点击事件
-    display->installEventFilter(tooltip);   // 安装悬浮窗的事件过滤器，用于显示悬浮窗
+    display->installEventFilter(tooltip);   // 安装悬浮窗的事件过滤器，用于联动悬浮窗的宽度和位置
     display->show();                        // 显示子窗口
 
-    m_displayviews_.push_back(display); // 添加显示控件到列表
+    m_displayviews_.push_back(display);     // 添加显示控件到列表
 }
 
 void VideoGridView::onVideoPlay(int index)
@@ -320,13 +339,16 @@ bool VideoGridView::eventFilter(QObject *watched, QEvent *event)
 
 void VideoGridView::paintEvent(QPaintEvent *event)
 {
-    // static int count = 0;
-    // qDebug() << "VideoGridView::paintEvent: " << count++;
+#if TESE_REPAINT_COUNT
+    // 测试重绘次数
+    m_test_repaint_count_++;
+#endif
 
     QWidget::paintEvent(event);
 
     QPainter painter(this);
     // painter.fillRect(rect(), QColor("darkgray"));
+    painter.fillRect(rect(), QColor("#383838"));
 
     QVector<QRect> geometries;
     int grid;
@@ -372,9 +394,9 @@ void VideoGridView::paintEvent(QPaintEvent *event)
         // 绘制选中框
         if (selectedIndex >= 0 && selectedIndex < geometries.size())
         {
-            painter.setPen(QPen(QColor("lightblue"), 3));
+            painter.setPen(QPen(QColor("lightblue"), 2));
             // painter.setBrush(Qt::NoBrush);  // 无填充
-            painter.drawRect(geometries[selectedIndex].adjusted(-2, -2, 1, 1));
+            painter.drawRect(geometries[selectedIndex].adjusted(-1, -1, 1, 1));
         }
     }
 }
