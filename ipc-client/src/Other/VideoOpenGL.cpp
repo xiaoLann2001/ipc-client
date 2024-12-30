@@ -161,11 +161,11 @@ void VideoOpenGL::initializeGL()
     f->glEnableVertexAttribArray(0);
     f->glEnableVertexAttribArray(1);
 #else
-    static const GLfloat vertices[] = { // 每行两个顶点坐标，两个纹理坐标
-        -1.0f,  -1.0f,  0.0f,   1.0f,
-        1.0f,   -1.0f,  1.0f,   1.0f,
-        -1.0f,  1.0f,   0.0f,   0.0f,
-        1.0f,   1.0f,   1.0f,   0.0f,
+    static const GLfloat vertices[] = { // 每行两个顶点坐标，两个纹理坐标，纹理坐标对 y 轴翻转
+        -1.0f,  -1.0f,  0.0f,   1.0f,   // 左下角
+        1.0f,   -1.0f,  1.0f,   1.0f,   // 右下角
+        -1.0f,  1.0f,   0.0f,   0.0f,   // 左上角
+        1.0f,   1.0f,   1.0f,   0.0f,   // 右上角
     };
 
     this->m->m_vao = new QOpenGLVertexArrayObject(this);
@@ -272,7 +272,7 @@ void VideoOpenGL::paintGL()
     case IMAGE_FORMAT_RGB888:
         f->glActiveTexture(GL_TEXTURE0);
         f->glBindTexture(GL_TEXTURE_2D, this->m->texture_id_y);
-        f->glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // 设置对齐，默认是 4
+        // f->glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // 设置对齐，默认是 4
         f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->m->m_video_w, this->m->m_video_h, 0, GL_RGB, GL_UNSIGNED_BYTE, this->m->m_video_ptr);
         break;
     case IMAGE_FORMAT_Grayscale8:
