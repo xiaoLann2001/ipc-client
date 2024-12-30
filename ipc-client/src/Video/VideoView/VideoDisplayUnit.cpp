@@ -47,16 +47,15 @@ void VideoDisplayUnit::onPause()
 
 void VideoDisplayUnit::onClose()
 {
+    // 重置图像和播放状态
     {
         QMutexLocker locker(&mtx_image_);
-        // 重置图像和播放状态，以及视频信息
         m_image_ = QImage();
     }
     {
         QMutexLocker locker(&mtx_playing_);
         m_isplaying_ = false;
     }
-    m_info_ = "";
     update();
 }
 

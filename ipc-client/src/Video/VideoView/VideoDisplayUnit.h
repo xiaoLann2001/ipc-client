@@ -9,6 +9,7 @@
 #include <QMutex>
 
 #include "VideoDisplayTooltip.h"
+#include "VideoSignalBus.h"
 
 class VideoDisplayUnit : public QWidget
 {
@@ -18,9 +19,8 @@ public:
     explicit VideoDisplayUnit(int id, QWidget *parent = nullptr);
 
     void setId(int id) { m_id_ = id; }
-    void setInfo(const QString &info) { m_info_ = info; }
-    void setImage(const QImage &image);
     int getId() const { return m_id_; }
+    void setImage(const QImage &image);
 
 protected:
     // 绘图事件处理函数
@@ -37,9 +37,6 @@ private:
 
     // 窗口标识
     int m_id_ = -1;                 // 唯一 ID
-
-    // 视频信息
-    QString m_info_;                // 视频信息，url，分辨率，码率等
 
     // 显示的图像
     QImage m_image_;
