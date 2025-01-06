@@ -11,6 +11,11 @@
 
 #include "VideoView/VideoView.h"
 
+const QString ICON_APPLOGO = ":/icons/app/app_logo.png";
+const QString ICON_APPMINIMIZE = ":/icons/app/app_minimize.png";
+const QString ICON_APPMAXIMIZE = ":/icons/app/app_maximize.png";
+const QString ICON_APPCLOSE = ":/icons/app/app_close.png";
+
 class IPCClientView : public QWidget
 {
     Q_OBJECT

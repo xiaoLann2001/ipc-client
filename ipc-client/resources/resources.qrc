@@ -1,17 +1,19 @@
 <RCC>
     <qresource prefix="/">
         <!-- Icons -->
-        <file>icons/applogo.png</file>
-        <file>icons/maximize.png</file>
-        <file>icons/toolbar_add.png</file>
-        <file>icons/toolbar_close.png</file>
-        <file>icons/toolbar_play.png</file>
-        <file>icons/toolbar_pause.png</file>
-        <file>icons/toolbar_fullscreen.png</file>
-        <file>icons/toolbar_restore.png</file>
-        <file>icons/toolbar_ai.png</file>
-        <file>icons/toolbar_snapshot.png</file>
-        <file>icons/toolbar_record.png</file>
+        <file>icons/app/app_logo.png</file>
+        <file>icons/app/app_minimize.png</file>
+        <file>icons/app/app_maximize.png</file>
+        <file>icons/app/app_close.png</file>
+        <file>icons/toolbar/toolbar_add.png</file>
+        <file>icons/toolbar/toolbar_close.png</file>
+        <file>icons/toolbar/toolbar_play.png</file>
+        <file>icons/toolbar/toolbar_pause.png</file>
+        <file>icons/toolbar/toolbar_fullscreen.png</file>
+        <file>icons/toolbar/toolbar_restore.png</file>
+        <file>icons/toolbar/toolbar_ai.png</file>
+        <file>icons/toolbar/toolbar_snapshot.png</file>
+        <file>icons/toolbar/toolbar_record.png</file>
 
         
         

@@ -11,15 +11,15 @@
 
 #include "VideoSignalBus.h"
 
-const QString ICON_ADD = ":/icons/toolbar_add.png";
-const QString ICON_PLAY = ":/icons/toolbar_play.png";
-const QString ICON_PAUSE = ":/icons/toolbar_pause.png";
-const QString ICON_SNAPSHOT = ":/icons/toolbar_snapshot.png";
-const QString ICON_RECORD = ":/icons/toolbar_record.png";
-const QString ICON_FULLSCREEN = ":/icons/toolbar_fullscreen.png";
-const QString ICON_RESTORE = ":/icons/toolbar_restore.png";
-const QString ICON_AI = ":/icons/toolbar_ai.png";
-const QString ICON_CLOSE = ":/icons/toolbar_close.png";
+const QString ICON_ADD = ":/icons/toolbar/toolbar_add.png";
+const QString ICON_PLAY = ":/icons/toolbar/toolbar_play.png";
+const QString ICON_PAUSE = ":/icons/toolbar/toolbar_pause.png";
+const QString ICON_SNAPSHOT = ":/icons/toolbar/toolbar_snapshot.png";
+const QString ICON_RECORD = ":/icons/toolbar/toolbar_record.png";
+const QString ICON_FULLSCREEN = ":/icons/toolbar/toolbar_fullscreen.png";
+const QString ICON_RESTORE = ":/icons/toolbar/toolbar_restore.png";
+const QString ICON_AI = ":/icons/toolbar/toolbar_ai.png";
+const QString ICON_CLOSE = ":/icons/toolbar/toolbar_close.png";
 
 class VideoToolbar : public QWidget
 {

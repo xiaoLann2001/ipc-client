@@ -3,8 +3,8 @@
 
 ### 本工程是网络摄像头客户端软件ipc-client
 
-### videoview布局图
+### app布局图
 
-![Alt text](videoview布局.png)
+![Alt text](app布局.png)
 
 ### 视频监控将由ipc-terminal、ipc-server、ipc-client三端组成

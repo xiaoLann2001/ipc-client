@@ -29,9 +29,9 @@ void IPCClientView::uiInit()
 
     // 应用 LOGO 和名称
     label_applogo = new QLabel("LOGO");
-    label_appname = new QLabel("IPC-CLIENT智能监控系统");
+    label_appname = new QLabel("IPC-CLIENT 智能监控系统");
     // 设置 LOGO 和名称样式
-    QPixmap pixmap_applogo(":/icons/applogo.png");
+    QPixmap pixmap_applogo(ICON_APPLOGO);
     label_applogo->setPixmap(pixmap_applogo);
     label_applogo->setScaledContents(true);
     label_applogo->setFixedSize(40, 40);
@@ -44,8 +44,9 @@ void IPCClientView::uiInit()
     pushButton_page_videoreply = new QPushButton("reply");
     pushButton_page_videoevent = new QPushButton("event");
     pushButton_page_videosetting = new QPushButton("setting");
+
     // 设置菜单按钮样式
-    QString button_page_style = "                                    \
+    QString button_page_style = "                               \
         QPushButton {                                           \
             min-height: 40px;                                   \
             font-size: 16px;                                    \
@@ -55,6 +56,7 @@ void IPCClientView::uiInit()
     pushButton_page_videoreply->setStyleSheet(button_page_style);
     pushButton_page_videoevent->setStyleSheet(button_page_style);
     pushButton_page_videosetting->setStyleSheet(button_page_style);
+
     // 添加菜单按钮到布局
     layout_menu->addWidget(pushButton_page_videoview);
     layout_menu->addWidget(pushButton_page_videosource);
@@ -70,11 +72,15 @@ void IPCClientView::uiInit()
     pushButton_minimize = new QPushButton(this);    // 最小化按钮
     pushButton_maximize = new QPushButton(this);    // 最大化按钮
     pushButton_close = new QPushButton(this);       // 关闭按钮
+    
     // 设置窗口控制按钮样式
-    // pushButton_minimize->setIcon(QIcon(":/icons/minimize.png"));
-    pushButton_maximize->setIcon(QIcon(":/icons/maximize.png"));
+    pushButton_minimize->setIcon(QIcon(ICON_APPMINIMIZE));
+    pushButton_maximize->setIcon(QIcon(ICON_APPMAXIMIZE));
+    pushButton_close->setIcon(QIcon(ICON_APPCLOSE));
+    pushButton_minimize->setIconSize(QSize(16, 16));
+    pushButton_maximize->setIconSize(QSize(16, 16));
+    pushButton_close->setIconSize(QSize(16, 16));
     // pushButton_maximize->setIconSize(pushButton_maximize->size());
-    // pushButton_close->setIcon(QIcon(":/icons/close.png"));
     QString button_window_control_style = "                 \
         QPushButton {                                       \
             min-width: 12px;                                \
@@ -92,6 +98,7 @@ void IPCClientView::uiInit()
     pushButton_minimize->setStyleSheet(button_window_control_style);
     pushButton_maximize->setStyleSheet(button_window_control_style);
     pushButton_close->setStyleSheet(button_window_control_style);
+
     // 添加窗口控制按钮到布局
     layout_windowcontrol->addWidget(pushButton_minimize);
     layout_windowcontrol->addWidget(pushButton_maximize);
@@ -162,20 +169,15 @@ void IPCClientView::controlInit()
 
 void IPCClientView::paintEvent(QPaintEvent *event)
 {
-    static int count = 0;
-    qDebug() << "IPCClientView::paintEvent" << count++;
+    // static int count = 0;
+    // qDebug() << "IPCClientView::paintEvent" << count++;
 
     // 创建 QPainter 对象
     QPainter painter(this);
 
     // 设置背景填充颜色
-    // painter.fillRect(this->rect(), QColor("lightgray"));
-    painter.fillRect(this->geometry(), QColor("#282828"));
-    
-    // 绘制 LOGO 和名称
-    // painter.setPen(QColor("black"));
-    // painter.drawText(20, 20, "LOGO");
-    // painter.drawText(80, 20, "IPC-CLIENT智能监控系统");
+    // painter.fillRect(this->geometry(), QColor("#282828"));   // 使用 geometry() 只会正确重绘一次
+    painter.fillRect(this->rect(), QColor("#282828"));
 
     QWidget::paintEvent(event);
 }
