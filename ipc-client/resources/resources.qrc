@@ -3,6 +3,15 @@
         <!-- Icons -->
         <file>icons/applogo.png</file>
         <file>icons/maximize.png</file>
+        <file>icons/toolbar_add.png</file>
+        <file>icons/toolbar_close.png</file>
+        <file>icons/toolbar_play.png</file>
+        <file>icons/toolbar_pause.png</file>
+        <file>icons/toolbar_fullscreen.png</file>
+        <file>icons/toolbar_restore.png</file>
+        <file>icons/toolbar_ai.png</file>
+        <file>icons/toolbar_snapshot.png</file>
+        <file>icons/toolbar_record.png</file>
 
         
         
