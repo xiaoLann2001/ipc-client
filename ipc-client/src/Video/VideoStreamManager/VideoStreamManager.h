@@ -2,15 +2,16 @@
 #define VIDEOSTREAMMANAGER_H
 
 #include <QObject>
-#include <QMap>
-#include <QSet>
 #include <QMutex>
+#include <QVector>
 #include <QString>
 
 #include "VideoStream/VideoStreamDecoder.h"
-#include "AudioPlayer/AudioPlayer.h"
+#include "HandleManager.h"
 
-// 视频流管理器
+/**
+ * @brief 视频流管理器，封装了视频流的创建、删除等操作，向外提供句柄使用视频流资源
+ */
 class VideoStreamManager : public QObject {
     Q_OBJECT
 
@@ -18,23 +19,20 @@ public:
     explicit VideoStreamManager(QObject *parent = nullptr);
     ~VideoStreamManager();
 
+    // 创建和删除视频流，创建后返回句柄，删除时传入句柄
     int createVideoStream(const QString &url);      // 创建视频流
     void deleteVideoStream(int handle);             // 删除视频流
+
+    // 通过句柄使用视频流资源
     VideoStreamInfo* getVideoStreamInfo(int handle);// 获取视频流信息
-    QImage getDecodedImage(int handle);             // 获取解码后的帧
+    QImage getDecodedImage(int handle);             // 获取解码后的图像帧
 
 signals:
-    void newFrameAvailable(int handle);             // 新帧可用信号
+    void newFrameAvailable(int handle);             // 新帧可用信号，传递时带上句柄
 
 private:
-    int generateHandle();                           // 生成唯一句柄
-    void recycleHandle(int handle);                 // 回收句柄
-
-    QSet<int> recycledHandles;               // 存储回收的句柄
-    QMap<int, VideoStreamDecoder*> m_streams;       // 句柄到视频流解码器的映射
-    QMutex m_mutex_streamMap;                       // 保护 m_streams 的互斥锁
-    QMap<int, AudioPlayer*> m_audioPlayers;         // 句柄到音频播放器的映射
-    QMutex m_mutex_audioPlayerMap;                  // 保护 m_audioPlayers 的互斥锁
+    // 句柄管理
+    HandleManager<VideoStreamDecoder> handleManager;// 句柄管理器
 };
 
 #endif // VIDEOSTREAMMANAGER_H

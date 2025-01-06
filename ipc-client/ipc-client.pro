@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia svg
+QT       += core gui multimedia widgets opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,48 +25,61 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11 thread debug
 
 SOURCES +=   \
+     \
     src/Core/IPCClientApplication.cpp \
     src/Core/IPCClientController.cpp \
     src/Core/main.cpp \
     src/UI/IPCClientView.cpp \
     src/Video/AudioPlayer/AudioPlayer.cpp \
+    src/Video/VideoController/VideoController.cpp \
+    src/Video/VideoPlayController/VideoPlayController.cpp \
     src/Video/VideoStream/VideoStreamDecoder.cpp \
-    src/Video/VideoStreamController/VideoStreamController.cpp \
     src/Video/VideoStreamManager/VideoStreamManager.cpp \
-    src/Video/VideoView/VideoDisplayTooltip.cpp \
-    src/Video/VideoView/VideoDisplayUnit.cpp \
-    src/Video/VideoView/VideoGridView.cpp \
-    src/Video/VideoView/VideoViewWidget.cpp
+    src/Video/VideoView/VideoGrid.cpp \
+    src/Video/VideoView/VideoOpenGL.cpp \
+    src/Video/VideoView/VideoPainter.cpp \
+    src/Video/VideoView/VideoToolbar.cpp \
+    src/Video/VideoView/VideoView.cpp
     
 HEADERS +=   \
+     \
     src/Core/IPCClientApplication.h \
     src/Core/IPCClientController.h \
     src/Core/Logger.h \
     src/Frameworks/IPCClientCoreSignalBus.h \
-    src/Frameworks/VideoControlCommand.h \
     src/Frameworks/VideoSignalBus.h \
     src/UI/IPCClientView.h \
     src/Utils/CustomQWidgetPool.h \
+    src/Utils/HandleManager.h \
     src/Video/AudioPlayer/AudioHelper.h \
     src/Video/AudioPlayer/AudioPlayer.h \
+    src/Video/VideoController/VideoController.h \
+    src/Video/VideoPlayController/VideoPlayController.h \
     src/Video/VideoStream/VideoStreamDecoder.h \
-    src/Video/VideoStreamController/VideoStreamController.h \
     src/Video/VideoStreamManager/VideoStreamManager.h \
-    src/Video/VideoView/VideoDisplayTooltip.h \
-    src/Video/VideoView/VideoDisplayUnit.h \
-    src/Video/VideoView/VideoGridView.h \
-    src/Video/VideoView/VideoViewWidget.h
+    src/Video/VideoView/VideoGrid.h \
+    src/Video/VideoView/VideoOpenGL.h \
+    src/Video/VideoView/VideoPainter.h \
+    src/Video/VideoView/VideoToolbar.h \
+    src/Video/VideoView/VideoView.h
     
 INCLUDEPATH +=  \
     src/Core \
     src/Frameworks \
     src/UI \
     src/Utils \
-    src/Video
+    src/Video \
+    src/Other
+
+# test
+SOURCES += 
+HEADERS += 
+INCLUDEPATH +=
+
 
 QMAKE_CXXFLAGS += -v
 
-#LIBS += -lavcodec -lavformat -lswscale -lavutil -lswresample
+#LIBS += -lavformat -lavfilter -lavcodec -lswresample -lswscale -lavutil
 #message("QMAKE_CXX : $$QMAKE_CXX")
 
 contains(QMAKE_CXX, /usr/bin/aarch64-linux-gnu-g++) {

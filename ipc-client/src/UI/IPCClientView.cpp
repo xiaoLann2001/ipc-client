@@ -109,7 +109,7 @@ void IPCClientView::uiInit()
 
     // 创建页面切换控件，显示主要内容
     stackedwidget = new QStackedWidget();
-    widget_videoview = new VideoViewWidget();   // 视频监控视图
+    widget_videoview = new VideoView();   // 视频监控视图
 //     widget_videosource = new VideoSourceWidget(); // 视频源视图
 //     widget_videoreply = new VideoReplyWidget(); // 视频回放视图
 //     widget_event = new EventWidget();           // 事件视图

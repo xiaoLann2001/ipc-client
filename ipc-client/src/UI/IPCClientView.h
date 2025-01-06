@@ -9,7 +9,7 @@
 #include <QPushButton>
 #include <QLabel>
 
-#include "VideoView/VideoViewWidget.h"
+#include "VideoView/VideoView.h"
 
 class IPCClientView : public QWidget
 {
@@ -19,7 +19,7 @@ public:
     explicit IPCClientView(QWidget *parent = nullptr);
     ~IPCClientView();
 
-    VideoViewWidget *getVideoViewWidget() { return widget_videoview; }
+    VideoView *getVideoView() { return widget_videoview; }
 
 signals:
     void pushButton_close_clicked();
@@ -65,7 +65,7 @@ private:
 
     // 创建页面切换控件，显示主要内容
     QStackedWidget *stackedwidget;
-    VideoViewWidget *widget_videoview;          // 视频监控窗口，由控制器传入
+    VideoView *widget_videoview;          // 视频监控窗口，由控制器传入
     // VideoSourceWidget *widget_videosource;
     // VideoReplyWidget *widget_videoreply;
     // EventWidget *widget_event;

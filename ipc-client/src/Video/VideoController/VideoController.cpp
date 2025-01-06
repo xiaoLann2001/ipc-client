@@ -3,21 +3,11 @@
 #include <QInputDialog>
 #include <QMenu>
 
-VideoController::VideoController(VideoStreamManager *manager, VideoViewWidget *view, QObject *parent)
+VideoController::VideoController(VideoStreamManager *manager, VideoView *view, QObject *parent)
     : QObject(parent), m_manager(manager), m_view(view) {
-
-    // 初始化对话框
-    m_inputDialog = new QInputDialog();
-    // m_inputDialog->setModal(false);
-    m_inputDialog->setWindowTitle(tr("添加IPC"));
-    m_inputDialog->setLabelText(tr("请输入IPC地址:"));
-    m_inputDialog->setTextValue("rtsp://192.168.5.185/live/1");
-    m_inputDialog->resize(400, 100);
-
-    // 初始化右键菜单
-    m_menu = new QMenu();
-    m_addIPCAction = m_menu->addAction(tr("添加IPC"));
-    m_removeIPCAction = m_menu->addAction(tr("移除IPC"));
+    
+    // 初始化 IPC 地址输入对话框和右键菜单
+    getUserInputInit();
 
     // 初始化信号与槽
     controlInit();
@@ -34,19 +24,34 @@ VideoController::~VideoController() {
     delete m_removeIPCAction;
 }
 
+void VideoController::getUserInputInit() {
+    // 初始化对话框
+    m_inputDialog = new QInputDialog();
+    // m_inputDialog->setModal(false);
+    m_inputDialog->setWindowTitle(tr("添加IPC"));
+    m_inputDialog->setLabelText(tr("请输入IPC地址:"));
+    m_inputDialog->setTextValue("rtsp://192.168.5.185/live/1");
+    m_inputDialog->resize(400, 100);
+
+    // 初始化右键菜单
+    m_menu = new QMenu();
+    m_addIPCAction = m_menu->addAction(tr("添加IPC"));
+    m_removeIPCAction = m_menu->addAction(tr("移除IPC"));
+}
+
 // 初始化信号与槽
 void VideoController::controlInit() {
+    // 连接信号总线的视频控制信号到槽函数
+    connect(VideoSignalBus::instance(), &VideoSignalBus::videoControlSignal, this, &VideoController::onVideoControlSignal);
+
     // 连接模型层的信号到槽函数
     connect(m_manager, &VideoStreamManager::newFrameAvailable, this, &VideoController::onNewFrameAvailable);
 
     // 连接视图层的信号到槽函数
-    connect(VideoSignalBus::instance(), &VideoSignalBus::videoControlSignal, this, &VideoController::onVideoControlSignal);
-    connect(m_view, &VideoViewWidget::addIPCClicked, this, &VideoController::onAddIPCClicked);
-
-    connect(m_view, &VideoViewWidget::videoGridChanged, this, &VideoController::onVideoGridChanged);
-
-    connect(m_view, &VideoViewWidget::videoGridViewClicked, this, &VideoController::onVideoViewClicked);
-    connect(m_view, &VideoViewWidget::videoGridViewRightClicked, this, &VideoController::onVideoViewRightClicked);
+    connect(m_view, &VideoView::addIPCClicked, this, &VideoController::onAddIPCClicked);
+    connect(m_view, &VideoView::videoGridChanged, this, &VideoController::onVideoGridChanged);
+    connect(m_view, &VideoView::videoClicked, this, &VideoController::onVideoViewClicked);
+    connect(m_view, &VideoView::videoRightClicked, this, &VideoController::onVideoViewRightClicked);
 }
 
 // 将视频流绑定到指定控件
@@ -71,16 +76,41 @@ void VideoController::createVideoStreamfromViewId(int videoDisplayUnitId, const 
         qDebug() << "window " << videoDisplayUnitId << " already has a video stream.";
         return;
     }
+
     int handle = m_manager->createVideoStream(url);     // 创建视频流
     bindViewToStream(videoDisplayUnitId, handle);       // 将视频流绑定到指定控件
+
+    // 创建播放控制器
+    VideoPlayController *playController = new VideoPlayController();
+    m_handleToPlayController[handle] = playController;  // 视频流句柄与播放控制器一一对应
+    playController->setId(videoDisplayUnitId);      // 指定播放控制器的视频显示单元 ID，以便分发视频帧到对应的视频控件
+    
+    // 连接控制器的视频帧到播放控制器
+    connect(this, &VideoController::videoFrameToControl, playController, &VideoPlayController::onVideoFrameToControl);
+
+    // 播放视频
+    playController->play();
 }
 
 // 根据控件 ID 删除视频流
 void VideoController::deleteVideoStreamfromViewId(int videoDisplayUnitId) {
     if (m_displayUnitToHandle.contains(videoDisplayUnitId)) {
+        // 删除视频流解码器
         int handle = m_displayUnitToHandle[videoDisplayUnitId];
         m_manager->deleteVideoStream(handle);
         unbindViewFromStream(videoDisplayUnitId);
+
+        // 删除播放控制器
+        if (m_handleToPlayController.contains(handle)) {
+            VideoPlayController *playController = m_handleToPlayController[handle];
+            // 停止播放
+            playController->stop();
+            // 断开连接
+            disconnect(this, &VideoController::videoFrameToControl, playController, &VideoPlayController::onVideoFrameToControl);
+            // 释放播放控制器
+            playController->deleteLater();
+            m_handleToPlayController.remove(handle);
+        }
     }
 }
 
@@ -130,20 +160,64 @@ void VideoController::onVideoControlSignal(const VideoControlCommand &command) {
         return;
     }
 
-    if (command.cmd == VideoControlCommand::Add) {
-        onAddVideoStream(command.id, command.param.toString());
-    } else if (command.cmd == VideoControlCommand::Close) {
-        onStopVideoDisplay(command.id);
+    if (command.cmd == VideoControlCommand::Command::Add) {
+        onAdd(command.id, command.param.toString());
+    } else if (command.cmd == VideoControlCommand::Command::Close) {
+        onClose(command.id);
+    } else if (command.cmd == VideoControlCommand::Command::Play) {
+        onPlay(command.id);
+    } else if (command.cmd == VideoControlCommand::Command::Pause) {
+        onPause(command.id);
+    } else if (command.cmd == VideoControlCommand::Command::Fullscreen) {
+        // 全屏，由视图层处理
+    } else if (command.cmd == VideoControlCommand::Command::Snapshot) {
+        // 截图，暂未实现
+    } else if (command.cmd == VideoControlCommand::Command::Record) {
+        // 录制，暂未实现
+    } else if (command.cmd == VideoControlCommand::Command::AI) {
+        // AI，暂未实现
     }
 }
 
-void VideoController::onAddVideoStream(int videoDisplayUnitId, const QString &url) {
-    Q_UNUSED(videoDisplayUnitId);
+void VideoController::onAdd(int videoDisplayUnitId, const QString &url) {
+    // createVideoStreamfromViewId(videoDisplayUnitId, url);
     Q_UNUSED(url);
+    // 获取用户输入的视频流地址
+    QString url1 = getUserInputFromDialog();
+    if (url1.isEmpty()) return;
+
+    createVideoStreamfromViewId(videoDisplayUnitId, url1);
+
+    emit VideoSignalBus::instance()->videoControlResponse(
+        VideoControlResponse(videoDisplayUnitId, 
+        VideoControlResponse::Command::Add, 
+        VideoControlResponse::Response::Success));
 }
 
-void VideoController::onStopVideoDisplay(int videoDisplayUnitId) {
-    Q_UNUSED(videoDisplayUnitId);
+void VideoController::onClose(int videoDisplayUnitId) {
+    deleteVideoStreamfromViewId(videoDisplayUnitId);
+    emit VideoSignalBus::instance()->videoControlResponse(
+        VideoControlResponse(videoDisplayUnitId, 
+        VideoControlResponse::Command::Close, 
+        VideoControlResponse::Response::Success));
+}
+
+void VideoController::onPlay(int videoDisplayUnitId) {
+    if (m_displayUnitToHandle.contains(videoDisplayUnitId)) {
+        int handle = m_displayUnitToHandle[videoDisplayUnitId];
+        if (m_handleToPlayController.contains(handle)) {
+            m_handleToPlayController[handle]->play();   // 调用对应视频流的播放控制器的播放函数
+        }
+    }
+}
+
+void VideoController::onPause(int videoDisplayUnitId) {
+    if (m_displayUnitToHandle.contains(videoDisplayUnitId)) {
+        int handle = m_displayUnitToHandle[videoDisplayUnitId];
+        if (m_handleToPlayController.contains(handle)) {
+            m_handleToPlayController[handle]->pause();  // 调用对应视频流的播放控制器的暂停函数
+        }
+    }
 }
 
 void VideoController::onOutOfGrid(int videoDisplayUnitId) {
@@ -160,27 +234,28 @@ void VideoController::onVideoPageChanged(int page) {
 
 
 void VideoController::onAddIPCClicked() {
+    // 获取用户输入的视频流地址
+    QString url = getUserInputFromDialog();
+    if (url.isEmpty()) return;
+
+    int realID = -1;
+
     // 若当前视频显示单元 ID 不为 -1，表示有被选中的窗口
     if (m_currentVideoDisplayUnitId != -1) {
-        QString url = getUserInputFromDialog();
-        if (!url.isEmpty()) {
-            // 创建视频流
-            createVideoStreamfromViewId(m_currentVideoDisplayUnitId, url);
-        }
-        m_view->onVideoPlay(m_currentVideoDisplayUnitId);
-    } else {    // 否则选择未绑定视频的最小 ID 的窗口显示
+        realID = m_currentVideoDisplayUnitId;
+    }
+    // 否则选择未绑定视频的最小 ID 的窗口显示
+    else {
         for (int i = 0; i < m_view->getGrid(); ++i) {
             if (!m_displayUnitToHandle.contains(i)) {
-                QString url = getUserInputFromDialog();
-                if (!url.isEmpty()) {
-                    // 创建视频流
-                    createVideoStreamfromViewId(i, url);
-                }
-                m_view->onVideoPlay(i);
+                realID = i;
                 break;
             }
         }
     }
+
+    // 为实际窗口创建视频流
+    if (realID != -1) createVideoStreamfromViewId(realID, url);
 }
 
 void VideoController::onVideoViewClicked(int videoDisplayUnitId) {
@@ -200,10 +275,10 @@ void VideoController::onVideoViewRightClicked(int videoDisplayUnitId, const QPoi
             // 创建视频流
             createVideoStreamfromViewId(videoDisplayUnitId, url);
         }
-        m_view->onVideoPlay(videoDisplayUnitId);
+        // m_view->onVideoPlay(videoDisplayUnitId);
     } else if (option == "removeIPC") {
         // 删除视频流
-        m_view->onVideoStop(videoDisplayUnitId);
+        // m_view->onVideoStop(videoDisplayUnitId);
         deleteVideoStreamfromViewId(videoDisplayUnitId);
     }
 }
@@ -224,9 +299,13 @@ void VideoController::onVideoViewRightClicked(int videoDisplayUnitId, const QPoi
 
 void VideoController::onNewFrameAvailable(int handle) {
     if (m_handleToDisplayUnit.contains(handle)) {
-        int videoDisplayUnitId = m_handleToDisplayUnit[handle];
+        // 获取解码后的视频帧
         QImage img = m_manager->getDecodedImage(handle);
-        m_view->onNewFrame(videoDisplayUnitId, img);
+        
+        // 发送视频帧到视频播放控制器
+        if (m_handleToPlayController.contains(handle)) {
+            emit videoFrameToControl(img);
+        }
     }
 }
 

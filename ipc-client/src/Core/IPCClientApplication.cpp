@@ -24,8 +24,8 @@ IPCClientApplication::IPCClientApplication(int argc, char *argv[])
     // 初始化视频监控界面
     videoInit();
 
-    // 初始化测试界面
-    testUiInit();
+    // 测试函数
+    testFunc();
 
     // 显示主界面
     m_ipc_client_view->show();
@@ -64,8 +64,8 @@ void IPCClientApplication::videoInit()
 {
     // 创建视频监控模块
     m_videoStreamManager = new VideoStreamManager();
-    m_videoViewWidget = m_ipc_client_view->getVideoViewWidget();
-    m_videoStreamController = new VideoStreamController(m_videoStreamManager, m_videoViewWidget);
+    m_videoView = m_ipc_client_view->getVideoView();
+    m_videoController = new VideoController(m_videoStreamManager, m_videoView);
 }
 
 void IPCClientApplication::onApplicationClose()
@@ -74,13 +74,30 @@ void IPCClientApplication::onApplicationClose()
     exit(0);
 }
 
-#include <QFrame>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPainter>
+// #include "HandleManager.h"
 
-void IPCClientApplication::testUiInit()
+void IPCClientApplication::testFunc()
 {
-    
+    // // 测试函数
+    // HandleManager<CustomObject> manager;
+
+    // // 创建两个对象并生成句柄
+    // auto handle1 = manager.createHandle(new CustomObject("Object1"));
+    // auto handle2 = manager.createHandle(new CustomObject("Object2"));
+
+    // // 获取资源
+    // auto resource1 = manager.getResource(handle1);
+    // auto resource2 = manager.getResource(handle2);
+
+    // qDebug() << "Resource 1 name:" << resource1->getName();
+    // qDebug() << "Resource 2 name:" << resource2->getName();
+
+    // // 回收句柄
+    // manager.releaseHandle(handle1);
+    // manager.releaseHandle(handle2);
+
+    // // 尝试获取已回收的资源
+    // auto invalidResource = manager.getResource(handle1);
+    // qDebug() << "Resource 1 after release:" << (invalidResource != nullptr);
+
 }

@@ -80,7 +80,9 @@
         "cfenv": "cpp",
         "qhboxlayout": "cpp",
         "qtoolbox": "cpp",
-        "qpixmap": "cpp"
+        "qpixmap": "cpp",
+        "qopenglwidget": "cpp",
+        "qopenglshaderprogram": "cpp"
     },
     "svg.preview.background": "dark-transparent"
 }

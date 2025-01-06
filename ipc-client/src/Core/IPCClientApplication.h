@@ -9,8 +9,8 @@
 
 // 视频监控模块
 #include "VideoStreamManager/VideoStreamManager.h"
-#include "VideoView/VideoViewWidget.h"
-#include "VideoStreamController/VideoStreamController.h"
+#include "VideoView/VideoView.h"
+#include "VideoController/VideoController.h"
 
 class IPCClientApplication : public QApplication
 {
@@ -23,7 +23,7 @@ public:
     void videoInit();
 
 
-    void testUiInit();
+    void testFunc();
 
 private slots:
     void onApplicationClose();
@@ -35,8 +35,8 @@ private:
 
     // 视频监控模块
     VideoStreamManager *m_videoStreamManager;
-    VideoViewWidget *m_videoViewWidget;
-    VideoStreamController *m_videoStreamController;
+    VideoView *m_videoView;
+    VideoController *m_videoController;
 };
 
 #endif // IPCCLIENTAPPLICATION_H
