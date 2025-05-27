@@ -105,7 +105,7 @@ TRANSLATIONS += resources/translations/lang_zh_CN.ts \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /root
+else: unix:!android: target.path = ~
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES +=  \
