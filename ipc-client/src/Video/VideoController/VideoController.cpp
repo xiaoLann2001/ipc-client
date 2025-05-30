@@ -176,6 +176,10 @@ void VideoController::onVideoControlSignal(const VideoControlCommand &command) {
         // 录制，暂未实现
     } else if (command.cmd == VideoControlCommand::Command::AI) {
         // AI，暂未实现
+    } else if (command.cmd == VideoControlCommand::Command::Sync) {
+        onSync(command.id);
+    } else {
+        qDebug() << "Unknown command: " << command.cmd;
     }
 }
 
@@ -216,6 +220,20 @@ void VideoController::onPause(int videoDisplayUnitId) {
         int handle = m_displayUnitToHandle[videoDisplayUnitId];
         if (m_handleToPlayController.contains(handle)) {
             m_handleToPlayController[handle]->pause();  // 调用对应视频流的播放控制器的暂停函数
+        }
+    }
+}
+
+void VideoController::onSync(int videoDisplayUnitId) {
+    if (m_displayUnitToHandle.contains(videoDisplayUnitId)) {
+        int handle = m_displayUnitToHandle[videoDisplayUnitId];
+        if (m_handleToPlayController.contains(handle)) {
+            // 获取播放控制器的状态
+            bool isPlaying = m_handleToPlayController[handle]->isPlaying();
+            emit VideoSignalBus::instance()->videoControlResponse(
+                VideoControlResponse(videoDisplayUnitId, 
+                VideoControlResponse::Command::Sync, 
+                isPlaying ? VideoControlResponse::Response::Success : VideoControlResponse::Response::Failed));
         }
     }
 }
@@ -297,6 +315,9 @@ void VideoController::onVideoViewRightClicked(int videoDisplayUnitId, const QPoi
 
 /*--------------------用于响应模型层的槽函数------------------------------------*/
 
+/**
+ * @brief 响应模型层新视频帧到达的信号，handle 是视频流的句柄
+*/
 void VideoController::onNewFrameAvailable(int handle) {
     if (m_handleToDisplayUnit.contains(handle)) {
         // 获取解码后的视频帧
@@ -304,7 +325,8 @@ void VideoController::onNewFrameAvailable(int handle) {
         
         // 发送视频帧到视频播放控制器
         if (m_handleToPlayController.contains(handle)) {
-            emit videoFrameToControl(img);
+            // emit videoFrameToControl(img);
+            m_handleToPlayController[handle]->onVideoFrameToControl(img);
         }
     }
 }

@@ -19,6 +19,7 @@ struct VideoControlCommand
         Snapshot,       // 截图
         Record,         // 录制
         AI,             // AI
+        Sync,           // 状态同步
     };
 
     int id;             // 视频窗口 ID
@@ -45,6 +46,7 @@ struct VideoControlResponse
         Snapshot,       // 截图
         Record,         // 录制
         AI,             // AI
+        Sync,           // 状态同步
     };
 
     enum Response

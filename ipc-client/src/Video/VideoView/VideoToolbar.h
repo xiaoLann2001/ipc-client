@@ -31,6 +31,7 @@ public:
     int getId() const { return m_id_; }                 // 获取 ID
     void setToolbarText(const QString &text);           // 设置悬浮窗口显示文本
     void setToolbarMode(bool haveAddIPC);               // 设置悬浮窗口显示模式
+    void syncToolbarMode();                             // 同步悬浮窗口显示模式
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event);

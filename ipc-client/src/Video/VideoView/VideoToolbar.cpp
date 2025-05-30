@@ -39,6 +39,12 @@ void VideoToolbar::setToolbarMode(bool haveAdd)
     }
 }
 
+void VideoToolbar::syncToolbarMode()
+{
+    // 发送同步信号到视频控制总线
+    emit VideoSignalBus::instance()->videoControlSignal(VideoControlCommand(m_id_, VideoControlCommand::Command::Sync));
+}
+
 void VideoToolbar::toolbarInit()
 {
     // 初始化悬浮窗，默认不可见
@@ -231,6 +237,16 @@ void VideoToolbar::controlInit()
                 break;
             case VideoControlResponse::Command::AI:
                 break;
+            case VideoControlResponse::Command::Sync:
+                // 同步状态
+                if (response.resp == VideoControlResponse::Response::Success) {
+                    // 如果有添加视频流，则显示已添加状态
+                    setToolbarMode(true);
+                } else {
+                    // 否则显示未添加状态
+                    setToolbarMode(false);
+                }
+                break;
             }
         } 
     });
@@ -255,6 +271,8 @@ bool VideoToolbar::eventFilter(QObject *watched, QEvent *event)
     }
     else if (event->type() == QEvent::Enter)
     {
+        syncToolbarMode(); // 同步悬浮窗口显示模式
+
         // 当鼠标进入父窗口时，显示悬浮窗
         if (!this->isVisible())
         {

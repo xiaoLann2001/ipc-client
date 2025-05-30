@@ -26,6 +26,7 @@ public slots:
     void onClose(int videoDisplayUnitId);                               // 停止指定控件的视频显示
     void onPlay(int videoDisplayUnitId);                                // 播放视频
     void onPause(int videoDisplayUnitId);                               // 暂停视频
+    void onSync(int videoDisplayUnitId);                              // 状态同步
 
     // 页码控制
     void onOutOfGrid(int videoDisplayUnitId);                           // 视频控件超出网格
